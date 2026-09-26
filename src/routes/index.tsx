@@ -15,12 +15,74 @@ import { YDS_CONFIG } from '@/config/yds';
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
-      { title: 'Youth Democratic Summit (YDS) by NSS MJCET' },
-      { name: 'description', content: 'Step inside the Youth Democratic Summit by NSS MJCET. Explore the experience, meet the parties and register.' },
-      { property: 'og:title', content: 'Youth Democratic Summit (YDS) by NSS MJCET' },
-      { property: 'og:description', content: 'Step inside the Youth Democratic Summit by NSS MJCET and register.' },
+      { title: 'Youth Democratic Summit (YDS 2026) | NSS MJCET Hyderabad' },
+      {
+        name: 'description',
+        content:
+          'Official portal for Youth Democratic Summit (YDS 2026) organised by NSS MJCET, Hyderabad. Experience dynamic parliamentary simulation, policy debates, and youth democratic governance. Register your 5-member team now.',
+      },
+      { property: 'og:title', content: 'Youth Democratic Summit (YDS 2026) | NSS MJCET Hyderabad' },
+      {
+        property: 'og:description',
+        content:
+          'Experience dynamic parliamentary simulation, policy debates, and democratic discourse at YDS 2026 by NSS MJCET. Exactly 5 members per team.',
+      },
       { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: 'https://www.ydsnssmjcet.in/' },
+      { property: 'og:image', content: 'https://www.ydsnssmjcet.in/yds-logo.png' },
       { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: 'Youth Democratic Summit (YDS 2026) | NSS MJCET' },
+      {
+        name: 'twitter:description',
+        content:
+          'Official team registration and event portal for YDS 2026 organised by NSS MJCET, Hyderabad.',
+      },
+      { name: 'twitter:image', content: 'https://www.ydsnssmjcet.in/yds-logo.png' },
+    ],
+    links: [
+      { rel: 'canonical', href: 'https://www.ydsnssmjcet.in/' },
+    ],
+    scripts: [
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Event',
+          name: 'Youth Democratic Summit 2026 (YDS 2026)',
+          description:
+            'A premier parliamentary simulation and youth democracy summit organized by NSS MJCET in Hyderabad.',
+          startDate: '2026-10-15T09:00:00+05:30',
+          endDate: '2026-10-16T18:00:00+05:30',
+          eventStatus: 'https://schema.org/EventScheduled',
+          eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+          location: {
+            '@type': 'Place',
+            name: 'Muffakham Jah College of Engineering and Technology (MJCET)',
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: 'Mount Pleasant, 8-2-249 to 267, Road No. 3, Banjara Hills',
+              addressLocality: 'Hyderabad',
+              addressRegion: 'Telangana',
+              postalCode: '500034',
+              addressCountry: 'IN',
+            },
+          },
+          image: ['https://www.ydsnssmjcet.in/yds-logo.png'],
+          organizer: {
+            '@type': 'Organization',
+            name: 'NSS MJCET',
+            url: 'https://www.ydsnssmjcet.in',
+          },
+          offers: {
+            '@type': 'Offer',
+            price: '0',
+            priceCurrency: 'INR',
+            availability: 'https://schema.org/InStock',
+            url: 'https://www.ydsnssmjcet.in/register',
+            validFrom: '2026-09-01T00:00:00+05:30',
+          },
+        }),
+      },
     ],
   }),
   component: Home,

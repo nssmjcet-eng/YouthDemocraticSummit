@@ -8,8 +8,21 @@ import logo from '@/assets/nss-logo.png';
 export const Route = createFileRoute('/parties/$partyId')({
   head: () => ({
     meta: [
-      { title: 'Party Details — Youth Democratic Summit 2026' },
-      { name: 'description', content: 'Fictional parliamentary party details for YDS 2026.' },
+      { title: 'Parliamentary Party Dossier — Youth Democratic Summit 2026 | NSS MJCET' },
+      {
+        name: 'description',
+        content:
+          'Official parliamentary party details, manifesto, ideology, and seat allocation for the Youth Democratic Summit (YDS 2026) organised by NSS MJCET, Hyderabad.',
+      },
+      { property: 'og:title', content: 'Parliamentary Party Dossier — YDS 2026 | NSS MJCET' },
+      {
+        property: 'og:description',
+        content: 'Official party details and manifesto for the Youth Democratic Summit 2026.',
+      },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:image', content: 'https://www.ydsnssmjcet.in/yds-logo.png' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:image', content: 'https://www.ydsnssmjcet.in/yds-logo.png' },
     ],
   }),
   component: PartyDetailPage,

@@ -77,6 +77,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "google-site-verification", content: "google3f82c9318c04029f" },
+      { name: "google-site-verification", content: "3f82c9318c04029f" },
+      { name: "theme-color", content: "#0B0C10" },
+      { name: "author", content: "NSS MJCET" },
+      { name: "robots", content: "index, follow, max-image-preview:large" },
+      {
+        name: "keywords",
+        content:
+          "Youth Democratic Summit, YDS 2026, NSS MJCET, MJCET Hyderabad, Youth Parliament, Student Democracy, Model Parliament, Debating Competition Hyderabad, College Summit Hyderabad, Muffakham Jah College of Engineering and Technology",
+      },
+      { property: "og:site_name", content: "Youth Democratic Summit 2026 | NSS MJCET" },
+      { property: "og:locale", content: "en_IN" },
+      { property: "og:image", content: "https://www.ydsnssmjcet.in/yds-logo.png" },
+      { property: "og:image:width", content: "512" },
+      { property: "og:image:height", content: "512" },
+      { property: "og:image:alt", content: "Youth Democratic Summit 2026 — NSS MJCET" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://www.ydsnssmjcet.in/yds-logo.png" },
+      { name: "twitter:site", content: "@yds_nssmjcet" },
     ],
     links: [
       {
@@ -87,6 +106,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" },
       { rel: "icon", href: "/nss-logo.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/yds-logo.png" },
+      { rel: "canonical", href: "https://www.ydsnssmjcet.in/" },
     ],
   }),
   shellComponent: RootShell,

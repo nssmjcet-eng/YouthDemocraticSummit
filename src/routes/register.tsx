@@ -7,19 +7,31 @@ import logo from '@/assets/nss-logo.png';
 export const Route = createFileRoute('/register')({
   head: () => ({
     meta: [
-      { title: 'Register Your Team — Youth Democratic Summit 2026' },
+      { title: 'Register Your Team — Youth Democratic Summit 2026 | NSS MJCET' },
       {
         name: 'description',
         content:
-          'Official 5-member team registration for the Youth Democratic Summit (YDS 2026) organised by NSS MJCET, Hyderabad.',
+          'Official 5-member team registration portal for the Youth Democratic Summit (YDS 2026) organised by NSS MJCET, Hyderabad. Free registration. Limited seats.',
       },
-      { property: 'og:title', content: 'Register Your Team — Youth Democratic Summit 2026' },
+      { property: 'og:title', content: 'Register Your Team — Youth Democratic Summit 2026 | NSS MJCET' },
       {
         property: 'og:description',
         content:
           'Official team application portal for YDS 2026. Exactly 5 members per team. Free registration.',
       },
       { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: 'https://www.ydsnssmjcet.in/register' },
+      { property: 'og:image', content: 'https://www.ydsnssmjcet.in/yds-logo.png' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: 'Register Your Team — YDS 2026 | NSS MJCET' },
+      {
+        name: 'twitter:description',
+        content: 'Form your 5-member team and register for the Youth Democratic Summit 2026.',
+      },
+      { name: 'twitter:image', content: 'https://www.ydsnssmjcet.in/yds-logo.png' },
+    ],
+    links: [
+      { rel: 'canonical', href: 'https://www.ydsnssmjcet.in/register' },
     ],
   }),
   component: RegisterPage,
