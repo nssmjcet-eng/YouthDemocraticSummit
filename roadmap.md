@@ -1,0 +1,6 @@
+- [x] Cinematic entrance, sections and registration form.
+- [x] Rename everything to Youth Democratic Summit (YDS) by NSS MJSET.
+- [x] Add the NSS MJSET logo to the header, footer and browser icon.
+- [x] Organiser sign-in and admin panel: review registrations, select/reject, assign a party.
+- [x] Public sections with placeholders: Results, Parties (25), Sponsors.
+- [ ] Real 25 party names/logos and sponsor details — waiting on the user.

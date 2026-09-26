@@ -1,0 +1,109 @@
+import { t as require_lib } from "../_libs/mongodb.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/mongo-client-D7yHtyi2.js
+var import_lib = require_lib();
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/yds2026";
+var MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || "yds2026";
+var SUPER_ADMIN_EMAIL = "nssmjcet@mjcollege.ac.in";
+async function getMongoDb() {
+	if (globalThis._ydsMongoDb && globalThis._ydsInitialized) return globalThis._ydsMongoDb;
+	if (!globalThis._ydsMongoClient) {
+		const newClient = new import_lib.MongoClient(MONGODB_URI, {
+			connectTimeoutMS: 5e3,
+			serverSelectionTimeoutMS: 5e3,
+			maxPoolSize: 10
+		});
+		try {
+			await newClient.connect();
+			globalThis._ydsMongoClient = newClient;
+			console.log("[MongoDB] Connected to database successfully (connection cached on globalThis)");
+		} catch (err) {
+			globalThis._ydsMongoClient = void 0;
+			console.error("[MongoDB] Connection error:", err?.message || err);
+			if (MONGODB_URI.includes("127.0.0.1") || MONGODB_URI.includes("localhost")) throw new Error("MongoDB is not reachable at 127.0.0.1:27017. Please ensure your local MongoDB service is running, or set MONGODB_URI in your .env file to a MongoDB Atlas cluster URI (mongodb+srv://...).");
+			throw new Error(`Database connection failed: ${err?.message || "Unknown error"}`);
+		}
+	}
+	const db = globalThis._ydsMongoClient.db(MONGODB_DB_NAME);
+	globalThis._ydsMongoDb = db;
+	globalThis._ydsGridFsBucket = new import_lib.GridFSBucket(db, { bucketName: "images" });
+	if (!globalThis._ydsInitialized) {
+		globalThis._ydsInitialized = true;
+		await ensureIndexes(db);
+		await seedSuperAdmin(db);
+		await seedDevelopers(db);
+	}
+	return db;
+}
+async function getGridFsBucket() {
+	await getMongoDb();
+	if (!globalThis._ydsGridFsBucket) throw new Error("GridFS bucket not initialized");
+	return globalThis._ydsGridFsBucket;
+}
+async function ensureIndexes(database) {
+	try {
+		await database.collection("adminUsers").createIndex({ email: 1 }, { unique: true });
+		const apps = database.collection("applications");
+		await apps.createIndex({ applicationId: 1 }, { unique: true });
+		await apps.createIndex({ status: 1 });
+		await apps.createIndex({ submittedAt: -1 });
+		await apps.createIndex({ "teamLeader.email": 1 });
+		await apps.createIndex({ temporaryTeamName: 1 });
+		await apps.createIndex({ "teamLeader.collegeName": 1 });
+		await database.collection("parties").createIndex({ sortOrder: 1 });
+		await database.collection("sponsors").createIndex({ displayOrder: 1 });
+		await database.collection("organisers").createIndex({ displayOrder: 1 });
+		await database.collection("coOrganisers").createIndex({ displayOrder: 1 });
+		await database.collection("developers").createIndex({ displayOrder: 1 });
+		await database.collection("auditLogs").createIndex({ timestamp: -1 });
+		await database.collection("images.files").createIndex({ "metadata.sha256": 1 });
+	} catch (err) {
+		console.warn("[MongoDB] Index creation warning:", err);
+	}
+}
+async function seedSuperAdmin(database) {
+	try {
+		const col = database.collection("adminUsers");
+		if (!await col.findOne({ email: SUPER_ADMIN_EMAIL })) {
+			await col.insertOne({
+				email: SUPER_ADMIN_EMAIL,
+				role: "SUPER_ADMIN",
+				status: "ACTIVE",
+				addedBy: "system",
+				addedAt: (/* @__PURE__ */ new Date()).toISOString(),
+				firebaseUid: null,
+				lastLoginAt: null
+			});
+			console.log("[MongoDB] Seeded default super admin:", SUPER_ADMIN_EMAIL);
+		}
+	} catch (err) {
+		console.warn("[MongoDB] Super admin seeding warning:", err);
+	}
+}
+async function seedDevelopers(database) {
+	try {
+		const col = database.collection("developers");
+		if (await col.countDocuments() === 0) {
+			const now = (/* @__PURE__ */ new Date()).toISOString();
+			await col.insertMany([{
+				name: "Shaik Adnan Hyder",
+				githubUrl: null,
+				linkedinUrl: null,
+				displayOrder: 1,
+				createdAt: now,
+				updatedAt: now
+			}, {
+				name: "Mirza Zohair Ali Baig",
+				githubUrl: null,
+				linkedinUrl: null,
+				displayOrder: 2,
+				createdAt: now,
+				updatedAt: now
+			}]);
+			console.log("[MongoDB] Seeded developer records");
+		}
+	} catch (err) {
+		console.warn("[MongoDB] Developer seeding warning:", err);
+	}
+}
+//#endregion
+export { getMongoDb as n, getGridFsBucket as t };

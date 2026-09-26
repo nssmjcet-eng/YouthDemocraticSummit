@@ -1,0 +1,1 @@
+import{r as e}from"./useRouter-BhW6-Hty.js";import{H as t}from"./index-HOcC5afp.js";var n=e(),r=()=>(0,n.jsx)(t,{});export{r as component};
