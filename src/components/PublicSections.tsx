@@ -128,12 +128,14 @@ export function PublicSections() {
           />
 
           {!isReleased ? (
-            <div className="public-empty yds-gated-box">
-              <Shield className="text-gold mb-3 inline-block" size={32} strokeWidth={1.5} />
-              <h3 className="font-serif text-2xl mb-2 text-foreground">Results will be announced soon.</h3>
-              <p className="text-sm text-muted-foreground max-w-lg">
-                The YDS 2026 selection committee is currently reviewing submitted team applications. Please stay tuned for
-                the official announcement on this website on <strong>{YDS_CONFIG.resultsDate}</strong>.
+            <div className="results-gated-box">
+              <Shield className="text-gold mb-4 inline-block" size={36} strokeWidth={1.5} />
+              <h3 className="font-serif text-2xl mb-3 text-foreground">Results will be announced soon.</h3>
+              <p className="text-sm text-muted-foreground">
+                The YDS 2026 selection committee is currently reviewing submitted team applications.
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                The official results will be published here on <strong>{YDS_CONFIG.resultsDate}</strong>. Please check back then.
               </p>
             </div>
           ) : results.length > 0 ? (
@@ -154,6 +156,7 @@ export function PublicSections() {
           )}
         </div>
       </section>
+
 
       {/* SECTION 05: PARTIES */}
       <section id="parties" className="section public-section alt">

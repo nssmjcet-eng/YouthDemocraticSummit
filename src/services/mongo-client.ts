@@ -74,6 +74,11 @@ async function ensureIndexes(database: Db): Promise<void> {
     await apps.createIndex({ 'teamLeader.email': 1 });
     await apps.createIndex({ temporaryTeamName: 1 });
     await apps.createIndex({ 'teamLeader.collegeName': 1 });
+    await apps.createIndex({ 'teamLeader.fullName': 1 });
+    await apps.createIndex({ 'teamLeader.contactNumber': 1 });
+    await apps.createIndex({ 'members.fullName': 1 });
+    await apps.createIndex({ 'members.email': 1 });
+    await apps.createIndex({ 'members.contactNumber': 1 });
 
     const parties = database.collection('parties');
     await parties.createIndex({ sortOrder: 1 });

@@ -604,3 +604,341 @@ export async function exportAllData(idToken: string) {
   };
 }
 
+// ── Master Compendium & Application Export System ─────────────────────────────
+
+export interface CompendiumOptions {
+  statusFilter?: string; // 'ALL' | 'ACCEPTED' | 'WAITLISTED' | 'DECLINED' | 'PENDING'
+  collegeFilter?: string;
+  dateRange?: string; // 'ALL' | 'TODAY' | '7DAYS' | '30DAYS' | 'CUSTOM'
+  customDateFrom?: string;
+  customDateTo?: string;
+  searchQuery?: string;
+  sortBy?: 'submittedAt' | 'teamName' | 'leaderName' | 'college' | 'status';
+  sortOrder?: 1 | -1;
+  page?: number;
+  pageSize?: number;
+}
+
+function buildCompendiumQuery(options: CompendiumOptions) {
+  const filter: Record<string, unknown> = {};
+
+  if (options.statusFilter && options.statusFilter !== 'ALL') {
+    filter['status'] = options.statusFilter;
+  }
+
+  if (options.collegeFilter && options.collegeFilter !== 'ALL') {
+    filter['teamLeader.collegeName'] = options.collegeFilter;
+  }
+
+  const now = new Date();
+  if (options.dateRange === 'TODAY') {
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    filter['submittedAt'] = { $gte: startOfToday };
+  } else if (options.dateRange === '7DAYS') {
+    const past7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    filter['submittedAt'] = { $gte: past7 };
+  } else if (options.dateRange === '30DAYS') {
+    const past30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    filter['submittedAt'] = { $gte: past30 };
+  } else if (options.dateRange === 'CUSTOM') {
+    const dateCond: Record<string, string> = {};
+    if (options.customDateFrom) {
+      dateCond['$gte'] = options.customDateFrom.includes('T')
+        ? options.customDateFrom
+        : `${options.customDateFrom}T00:00:00.000Z`;
+    }
+    if (options.customDateTo) {
+      dateCond['$lte'] = options.customDateTo.includes('T')
+        ? options.customDateTo
+        : `${options.customDateTo}T23:59:59.999Z`;
+    }
+    if (Object.keys(dateCond).length > 0) {
+      filter['submittedAt'] = dateCond;
+    }
+  }
+
+  if (options.searchQuery && options.searchQuery.trim()) {
+    const q = options.searchQuery.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(q, 'i');
+    filter['$or'] = [
+      { applicationId: regex },
+      { temporaryTeamName: regex },
+      { 'teamLeader.fullName': regex },
+      { 'teamLeader.email': regex },
+      { 'teamLeader.collegeName': regex },
+      { 'teamLeader.contactNumber': regex },
+      { 'members.fullName': regex },
+      { 'members.email': regex },
+      { 'members.contactNumber': regex },
+    ];
+  }
+
+  return filter;
+}
+
+function mapToCompendiumTeam(doc: any, index: number) {
+  const leader = doc.teamLeader || {};
+  const rawMembers = Array.isArray(doc.members) ? doc.members : [];
+
+  const member1 = {
+    memberNumber: 1,
+    isLeader: true,
+    fullName: leader.fullName || 'N/A',
+    email: leader.email || 'N/A',
+    contactNumber: leader.contactNumber || 'N/A',
+    college: leader.collegeName || 'N/A',
+    yearOfStudy: leader.yearOfStudy || '',
+    courseBranch: leader.courseBranch || '',
+  };
+
+  const otherMembers = rawMembers.slice(0, 4).map((m: any, idx: number) => ({
+    memberNumber: idx + 2,
+    isLeader: false,
+    fullName: m?.fullName || 'N/A',
+    email: m?.email || 'N/A',
+    contactNumber: m?.contactNumber || 'N/A',
+    college: m?.college || leader.collegeName || 'N/A',
+    yearOfStudy: m?.yearOfStudy || '',
+    courseBranch: m?.courseBranch || '',
+  }));
+
+  while (otherMembers.length < 4) {
+    otherMembers.push({
+      memberNumber: otherMembers.length + 2,
+      isLeader: false,
+      fullName: 'N/A',
+      email: 'N/A',
+      contactNumber: 'N/A',
+      college: leader.collegeName || 'N/A',
+      yearOfStudy: '',
+      courseBranch: '',
+    });
+  }
+
+  const allMembers = [member1, ...otherMembers];
+
+  const isIncomplete =
+    !leader.fullName ||
+    !leader.email ||
+    !leader.contactNumber ||
+    rawMembers.length < 4 ||
+    rawMembers.some((m: any) => !m?.fullName || !m?.contactNumber);
+
+  const displayStatusMap: Record<string, string> = {
+    ACCEPTED: 'SELECTED',
+    WAITLISTED: 'WAITLISTED',
+    DECLINED: 'NOT SELECTED',
+    PENDING: 'PENDING',
+  };
+
+  return {
+    sNo: index + 1,
+    id: doc._id.toString(),
+    applicationId: doc.applicationId || 'N/A',
+    teamName: doc.temporaryTeamName || 'Unnamed Team',
+    teamLeader: {
+      fullName: leader.fullName || 'N/A',
+      email: leader.email || 'N/A',
+      contactNumber: leader.contactNumber || 'N/A',
+      collegeName: leader.collegeName || 'N/A',
+    },
+    college: leader.collegeName || 'N/A',
+    members: allMembers,
+    totalMembers: 1 + rawMembers.length,
+    status: doc.status || 'PENDING',
+    displayStatus: displayStatusMap[doc.status] || 'PENDING',
+    assignedPartyName: doc.assignedPartyName || null,
+    submittedAt: doc.submittedAt || '',
+    isIncomplete,
+  };
+}
+
+export async function getCompendium(idToken: string, options: CompendiumOptions = {}) {
+  await requireAdminByToken(idToken);
+  const db = await getMongoDb();
+
+  const filter = buildCompendiumQuery(options);
+  const { page = 1, pageSize = 50, sortBy = 'submittedAt', sortOrder = -1 } = options;
+
+  let sortStage: Record<string, 1 | -1> = { submittedAt: -1 };
+  if (sortBy === 'teamName') sortStage = { temporaryTeamName: sortOrder };
+  else if (sortBy === 'leaderName') sortStage = { 'teamLeader.fullName': sortOrder };
+  else if (sortBy === 'college') sortStage = { 'teamLeader.collegeName': sortOrder };
+  else if (sortBy === 'status') sortStage = { status: sortOrder };
+  else if (sortBy === 'submittedAt') sortStage = { submittedAt: sortOrder };
+
+  const projection = {
+    _id: 1,
+    applicationId: 1,
+    temporaryTeamName: 1,
+    teamLeader: 1,
+    members: 1,
+    status: 1,
+    assignedPartyName: 1,
+    submittedAt: 1,
+  };
+
+  const skip = (page - 1) * pageSize;
+
+  const [
+    totalApplications,
+    selectedTeams,
+    waitlistedTeams,
+    notSelectedTeams,
+    pendingTeams,
+    participantStats,
+    distinctColleges,
+    filteredCount,
+    docs,
+  ] = await Promise.all([
+    db.collection('applications').countDocuments({}),
+    db.collection('applications').countDocuments({ status: 'ACCEPTED' }),
+    db.collection('applications').countDocuments({ status: 'WAITLISTED' }),
+    db.collection('applications').countDocuments({ status: 'DECLINED' }),
+    db.collection('applications').countDocuments({ status: 'PENDING' }),
+    db.collection('applications').aggregate([
+      {
+        $project: {
+          leaderCount: { $cond: [{ $ifNull: ['$teamLeader.fullName', false] }, 1, 0] },
+          membersCount: { $size: { $ifNull: ['$members', []] } },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalParticipants: { $sum: { $add: ['$leaderCount', '$membersCount'] } },
+          incompleteCount: {
+            $sum: {
+              $cond: [
+                { $or: [{ $eq: ['$leaderCount', 0] }, { $lt: ['$membersCount', 4] }] },
+                1,
+                0,
+              ],
+            },
+          },
+        },
+      },
+    ]).toArray(),
+    db.collection('applications').distinct('teamLeader.collegeName'),
+    db.collection('applications').countDocuments(filter),
+    db.collection('applications')
+      .find(filter, { projection })
+      .sort(sortStage)
+      .skip(skip)
+      .limit(pageSize)
+      .toArray(),
+  ]);
+
+  const statsDoc = participantStats[0] || { totalParticipants: 0, incompleteCount: 0 };
+  const colleges = (distinctColleges as string[])
+    .filter((c) => Boolean(c && typeof c === 'string' && c.trim()))
+    .sort();
+
+  const teams = docs.map((doc, idx) => mapToCompendiumTeam(doc, skip + idx));
+
+  return {
+    summary: {
+      totalApplications,
+      totalTeamsRegistered: totalApplications,
+      selectedTeams,
+      waitlistedTeams,
+      notSelectedTeams,
+      pendingTeams,
+      totalParticipants: statsDoc.totalParticipants,
+      incompleteCount: statsDoc.incompleteCount,
+    },
+    colleges,
+    teams,
+    totalCount: filteredCount,
+    page,
+    pageSize,
+    totalPages: Math.ceil(filteredCount / pageSize) || 1,
+  };
+}
+
+export async function exportCompendium(
+  idToken: string,
+  options: {
+    statusFilter?: string;
+    collegeFilter?: string;
+    dateRange?: string;
+    customDateFrom?: string;
+    customDateTo?: string;
+    searchQuery?: string;
+    format: 'CSV' | 'PDF';
+    includePartyAllocation?: boolean;
+  },
+) {
+  const admin = await requireAdminByToken(idToken);
+  const db = await getMongoDb();
+
+  const filter = buildCompendiumQuery(options);
+
+  const projection = {
+    _id: 1,
+    applicationId: 1,
+    temporaryTeamName: 1,
+    teamLeader: 1,
+    members: 1,
+    status: 1,
+    assignedPartyName: 1,
+    submittedAt: 1,
+  };
+
+  const docs = await db
+    .collection('applications')
+    .find(filter, { projection })
+    .sort({ submittedAt: -1 })
+    .toArray();
+
+  const teams = docs.map((doc, idx) => mapToCompendiumTeam(doc, idx));
+
+  const selectedTeams = teams.filter((t) => t.status === 'ACCEPTED').length;
+  const waitlistedTeams = teams.filter((t) => t.status === 'WAITLISTED').length;
+  const notSelectedTeams = teams.filter((t) => t.status === 'DECLINED').length;
+  const pendingTeams = teams.filter((t) => t.status === 'PENDING').length;
+  const totalParticipants = teams.reduce((acc, t) => acc + t.totalMembers, 0);
+
+  await db.collection('auditLogs').insertOne({
+    collection: 'applications',
+    action: 'MASTER_COMPENDIUM_EXPORT',
+    adminEmail: admin.email,
+    timestamp: new Date().toISOString(),
+    details: `Exported ${teams.length} records in ${options.format} format (Filter: ${options.statusFilter || 'ALL'})`,
+    format: options.format,
+    recordCount: teams.length,
+    statusFilter: options.statusFilter || 'ALL',
+  });
+
+  return {
+    exportedAt: new Date().toISOString(),
+    format: options.format,
+    recordCount: teams.length,
+    includePartyAllocation: Boolean(options.includePartyAllocation),
+    statusFilter: options.statusFilter || 'ALL',
+    summary: {
+      totalApplications: teams.length,
+      selectedTeams,
+      waitlistedTeams,
+      notSelectedTeams,
+      pendingTeams,
+      totalParticipants,
+    },
+    teams,
+  };
+}
+
+// ── Clear All Applications (Super Admin only) ─────────────────────────────────
+export async function clearAllApplications(idToken: string): Promise<{ deletedCount: number }> {
+  const admin = await requireSuperAdminByToken(idToken);
+  const db = await getDb();
+  const result = await db.collection('applications').deleteMany({});
+  await db.collection('auditLogs').insertOne({
+    collection: 'applications',
+    action: 'CLEAR_ALL_APPLICATIONS',
+    adminEmail: admin.email,
+    timestamp: new Date().toISOString(),
+    details: `Deleted all ${result.deletedCount} application documents from the database.`,
+  });
+  return { deletedCount: result.deletedCount ?? 0 };
+}

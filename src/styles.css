@@ -332,7 +332,24 @@
 .party-logo { width: 56px; height: 56px; border-radius: 50%; border: 1px solid oklch(.72 .081 78 / .5); display: grid; place-items: center; font: 600 1.1rem var(--serif); overflow: hidden; }
 .party-logo img { width: 100%; height: 100%; object-fit: cover; }
 
-/* ── Specific card styles to differentiate sections ── */
+/* Results gated (not yet released) state */
+.results-gated-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 64px 40px;
+  margin-top: 48px;
+  background: var(--card);
+  border: 1px solid oklch(0.72 0.081 78 / 0.3);
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
 /* Results cards */
 .result-item {
   background: var(--card);
@@ -1361,6 +1378,29 @@
   margin-top: 40px;
 }
 
+@media (max-width: 600px) {
+  .people-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .people-card-name {
+    font-size: 0.88rem;
+  }
+  .people-card-role {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+  .people-card-overlay {
+    padding: 32px 10px 10px;
+  }
+  .people-card-linkedin {
+    width: 26px;
+    height: 26px;
+    bottom: 10px;
+    right: 10px;
+  }
+}
+
 .people-card {
   position: relative;
   background: var(--card);
@@ -1523,6 +1563,128 @@
   font-size: 13px;
   color: var(--muted-foreground);
   opacity: 0.6;
+}
+
+/* ── Master Compendium Styles ────────────────────────────────────────────── */
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.comp-table th {
+  padding: 12px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  border-bottom: 1px solid var(--border);
+  background: var(--muted)/30;
+  white-space: nowrap;
+}
+
+.comp-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.comp-row:hover {
+  background: var(--muted)/15;
+}
+
+.comp-row.expanded {
+  background: var(--muted)/25;
+}
+
+.comp-row-member {
+  background: var(--muted)/10;
+  font-size: 12px;
+}
+
+.comp-row-member td {
+  padding: 8px 14px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.comp-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.comp-expand-btn:hover {
+  background: var(--muted);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+.comp-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.comp-chip-selected {
+  background: #16a34a1a;
+  color: #16a34a;
+  border: 1px solid #16a34a40;
+}
+
+.comp-chip-waitlisted {
+  background: #d977061a;
+  color: #d97706;
+  border: 1px solid #d9770640;
+}
+
+.comp-chip-declined {
+  background: #dc26261a;
+  color: #dc2626;
+  border: 1px solid #dc262640;
+}
+
+.comp-chip-pending {
+  background: #4b55631a;
+  color: #4b5563;
+  border: 1px solid #4b556340;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .admin-page,
+  .comp-table,
+  .comp-table * {
+    visibility: visible;
+  }
+  .admin-header,
+  .yds-admin-nav,
+  .yds-card:has(.yds-search-input),
+  .comp-expand-btn,
+  button {
+    display: none !important;
+  }
+  .comp-table {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
 }
 
 

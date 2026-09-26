@@ -247,3 +247,53 @@ export const adminExportData = createServerFn({ method: 'POST' })
     return exportAllData(data.idToken);
   });
 
+// ── Master Compendium & Export ────────────────────────────────────────────────
+
+export const adminGetCompendium = createServerFn({ method: 'POST' })
+  .validator((data: {
+    idToken: string;
+    statusFilter?: string;
+    collegeFilter?: string;
+    dateRange?: string;
+    customDateFrom?: string;
+    customDateTo?: string;
+    searchQuery?: string;
+    sortBy?: 'submittedAt' | 'teamName' | 'leaderName' | 'college' | 'status';
+    sortOrder?: 1 | -1;
+    page?: number;
+    pageSize?: number;
+  }) => data)
+  .handler(async ({ data }) => {
+    const { getCompendium } = await import('@/services/admin');
+    const { idToken, ...opts } = data;
+    return getCompendium(idToken, opts);
+  });
+
+export const adminExportCompendium = createServerFn({ method: 'POST' })
+  .validator((data: {
+    idToken: string;
+    statusFilter?: string;
+    collegeFilter?: string;
+    dateRange?: string;
+    customDateFrom?: string;
+    customDateTo?: string;
+    searchQuery?: string;
+    format: 'CSV' | 'PDF';
+    includePartyAllocation?: boolean;
+  }) => data)
+  .handler(async ({ data }) => {
+    const { exportCompendium } = await import('@/services/admin');
+    const { idToken, ...opts } = data;
+    return exportCompendium(idToken, opts);
+  });
+
+// ── Clear All Applications (SUPER ADMIN only) ─────────────────────────────────
+export const adminClearApplications = createServerFn({ method: 'POST' })
+  .validator((data: { idToken: string }) => data)
+  .handler(async ({ data }) => {
+    const { clearAllApplications } = await import('@/services/admin');
+    return clearAllApplications(data.idToken);
+  });
+
+
+

@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, Fragment } from 'react';
 import {
   Check,
   LogOut,
@@ -28,6 +28,12 @@ import {
   Download,
   Code,
   Edit,
+  Printer,
+  FileText,
+  ChevronDown,
+  Filter,
+  Calendar,
+  Copy,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ImageInput } from '@/components/ImageInput';
@@ -64,6 +70,9 @@ import {
   adminUpsertDeveloper,
   adminGetDbStats,
   adminExportData,
+  adminGetCompendium,
+  adminExportCompendium,
+  adminClearApplications,
 } from '@/functions/admin';
 import type { TeamApplicationPayload } from '@/types/yds';
 
@@ -83,6 +92,7 @@ type AdminNavTab =
   | 'party-allocation'
   | 'parties-config'
   | 'results'
+  | 'compendium'
   | 'sponsors'
   | 'organisers'
   | 'co-organisers'
@@ -167,6 +177,18 @@ function AdminPanel() {
 
   // ── Export state ──────────────────────────────────────────────────────────
   const [isExporting, setIsExporting] = useState(false);
+
+  // ── Compendium state ──────────────────────────────────────────────────────
+  const [compendiumStatusFilter, setCompendiumStatusFilter] = useState('ALL');
+  const [compendiumSearch, setCompendiumSearch] = useState('');
+  const [compendiumPage, setCompendiumPage] = useState(1);
+  const [compendiumSortBy, setCompendiumSortBy] = useState<'submittedAt' | 'teamName' | 'leaderName' | 'college' | 'status'>('submittedAt');
+  const [compendiumSortOrder, setCompendiumSortOrder] = useState<1 | -1>(-1);
+  const [expandedTeamId, setExpandedTeamId] = useState<string | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportIncludeParty, setExportIncludeParty] = useState(false);
+  const [isExportingCompendium, setIsExportingCompendium] = useState(false);
+  const [isClearingApps, setIsClearingApps] = useState(false);
 
   const adminUserEmail: string = (routeCtx as any)?.user?.email ?? firebaseAuth.currentUser?.email ?? '';
   const isSuperAdmin: boolean = (routeCtx as any)?.isSuperAdmin ?? false;
@@ -331,6 +353,16 @@ function AdminPanel() {
     queryFn: async () => {
       const tok = idTokenFromCtx || await getIdToken() || '';
       return adminGetDbStats({ data: { idToken: tok } });
+    },
+  });
+
+  // ── Master Compendium ─────────────────────────────────────────────────────
+  const compendiumQuery = useQuery({
+    queryKey: ['admin-compendium', compendiumStatusFilter, compendiumSearch, compendiumPage, compendiumSortBy, compendiumSortOrder],
+    enabled: activeTab === 'compendium',
+    queryFn: async () => {
+      const tok = idTokenFromCtx || await getIdToken() || '';
+      return adminGetCompendium({ data: { idToken: tok, statusFilter: compendiumStatusFilter, searchQuery: compendiumSearch, page: compendiumPage, pageSize: 50, sortBy: compendiumSortBy, sortOrder: compendiumSortOrder } });
     },
   });
 
@@ -562,6 +594,68 @@ function AdminPanel() {
     }
   };
 
+  const handleCompendiumCsvExport = async (statusFilter: string) => {
+    setIsExportingCompendium(true);
+    try {
+      const tok = idTokenFromCtx || await getIdToken() || '';
+      const data = await adminExportCompendium({ data: { idToken: tok, statusFilter, format: 'CSV', includePartyAllocation: exportIncludeParty } });
+      const teams: any[] = data.teams ?? [];
+      const headers = ['S.No', 'App ID', 'Team Name', 'Status', 'Member 1 Name', 'Member 1 Email', 'Member 1 Phone', 'Member 1 College', 'Member 1 Year',
+        'Member 2 Name', 'Member 2 Email', 'Member 2 Phone', 'Member 2 College', 'Member 2 Year',
+        'Member 3 Name', 'Member 3 Email', 'Member 3 Phone', 'Member 3 College', 'Member 3 Year',
+        'Member 4 Name', 'Member 4 Email', 'Member 4 Phone', 'Member 4 College', 'Member 4 Year',
+        'Member 5 Name', 'Member 5 Email', 'Member 5 Phone', 'Member 5 College', 'Member 5 Year',
+        ...(exportIncludeParty ? ['Assigned Party'] : []),
+        'Submitted At',
+      ];
+      const rows = teams.map((t: any) => {
+        const memberCols: string[] = [];
+        for (let i = 0; i < 5; i++) {
+          const m = t.members?.[i];
+          memberCols.push(m?.fullName ?? 'N/A', m?.email ?? 'N/A', m?.contactNumber ?? 'N/A', m?.college ?? 'N/A', m?.yearOfStudy ?? 'N/A');
+        }
+        return [
+          t.sNo, t.applicationId, t.teamName, t.displayStatus,
+          ...memberCols,
+          ...(exportIncludeParty ? [t.assignedPartyName ?? 'Not Allocated'] : []),
+          t.submittedAt ? new Date(t.submittedAt).toLocaleString() : '',
+        ].map((v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',');
+      });
+      const csv = [headers.map((h) => `"${h}"`).join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `yds-2026-compendium-${statusFilter.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setShowExportModal(false);
+    } catch (err: any) {
+      alert(`Export failed: ${err?.message || err}`);
+    } finally {
+      setIsExportingCompendium(false);
+    }
+  };
+
+  const handleClearApplications = async () => {
+    if (!confirm('⚠️ DANGER: This will permanently delete ALL application documents from the database. This cannot be undone. Type "DELETE ALL" to confirm.')) return;
+    const confirm2 = window.prompt('Type DELETE ALL to confirm permanent deletion:');
+    if (confirm2 !== 'DELETE ALL') { alert('Cancelled — text did not match.'); return; }
+    setIsClearingApps(true);
+    try {
+      const tok = idTokenFromCtx || await getIdToken() || '';
+      const res = await adminClearApplications({ data: { idToken: tok } });
+      alert(`✅ Deleted ${(res as any).deletedCount} application records successfully.`);
+      queryClient.invalidateQueries({ queryKey: ['admin-registrations'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-compendium'] });
+    } catch (err: any) {
+      alert(`Failed: ${err?.message || err}`);
+    } finally {
+      setIsClearingApps(false);
+    }
+  };
+
   const signOut = async () => {
     await queryClient.cancelQueries();
     queryClient.clear();
@@ -651,6 +745,7 @@ function AdminPanel() {
           ['party-allocation', 'Party Allocation', stats.accepted],
           ['parties-config', 'Parties Master', parties.length],
           ['results', 'Results', null],
+          ['compendium', 'Master Compendium', stats.total],
           ['sponsors', 'Sponsors', sponsors.length],
           ['organisers', 'Organisers', organisers.length],
           ['co-organisers', 'Co-Organisers', coOrganisers.length],
@@ -1076,6 +1171,197 @@ function AdminPanel() {
         </section>
       )}
 
+      {/* ── TAB: MASTER COMPENDIUM ────────────────────────────────────────── */}
+      {activeTab === 'compendium' && (() => {
+        const compData = compendiumQuery.data as any;
+        const compTeams: any[] = compData?.teams ?? [];
+        const compSummary = compData?.summary ?? {};
+        const compTotalPages = compData?.totalPages ?? 1;
+        const statusChipClass = (s: string) => {
+          if (s === 'SELECTED') return 'comp-chip comp-chip-selected';
+          if (s === 'WAITLISTED') return 'comp-chip comp-chip-waitlisted';
+          if (s === 'NOT SELECTED') return 'comp-chip comp-chip-declined';
+          return 'comp-chip comp-chip-pending';
+        };
+        const sortIcon = (col: string) => compendiumSortBy === col ? (compendiumSortOrder === -1 ? ' ↓' : ' ↑') : '';
+        return (
+          <section className="space-y-6 animate-in fade-in-50">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span className="eyebrow">YDS 2026 · ALL REGISTRATIONS</span>
+                <h2 className="font-serif text-2xl">Master Compendium</h2>
+                <p className="text-xs text-muted-foreground mt-1">Complete list of all team applications — names, contacts, colleges.</p>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => window.print()}>
+                  <Printer size={14} /> Print
+                </Button>
+                <Button size="sm" className="gap-1 bg-gold text-deep hover:bg-gold/90 font-bold" onClick={() => setShowExportModal(true)}>
+                  <Download size={14} /> Export CSV
+                </Button>
+              </div>
+            </div>
+
+            {/* Summary Stats */}
+            {compData && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="yds-stat-box"><span className="stat-label">TOTAL TEAMS</span><span className="stat-val">{compSummary.totalApplications ?? 0}</span><span className="stat-sub">{(compSummary.totalParticipants ?? 0)} participants</span></div>
+                <div className="yds-stat-box border-green-500/40"><span className="stat-label text-green-600">SELECTED</span><span className="stat-val text-green-600">{compSummary.selectedTeams ?? 0}</span><span className="stat-sub">Accepted teams</span></div>
+                <div className="yds-stat-box border-amber-500/40"><span className="stat-label text-amber-600">WAITLISTED</span><span className="stat-val text-amber-600">{compSummary.waitlistedTeams ?? 0}</span><span className="stat-sub">On standby</span></div>
+                <div className="yds-stat-box"><span className="stat-label text-muted-foreground">PENDING</span><span className="stat-val">{compSummary.pendingTeams ?? 0}</span><span className="stat-sub">Awaiting review</span></div>
+              </div>
+            )}
+
+            {/* Filters + Search */}
+            <div className="yds-card p-4 space-y-3">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    className="yds-search-input pl-8 w-full"
+                    placeholder="Search team name, leader name, college, app ID…"
+                    value={compendiumSearch}
+                    onChange={(e) => { setCompendiumSearch(e.target.value); setCompendiumPage(1); }}
+                  />
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {(['ALL', 'PENDING', 'ACCEPTED', 'WAITLISTED', 'DECLINED'] as const).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      className={compendiumStatusFilter === s ? 'yds-filter-tab active' : 'yds-filter-tab'}
+                      onClick={() => { setCompendiumStatusFilter(s); setCompendiumPage(1); }}
+                    >{s === 'ALL' ? 'All' : s === 'ACCEPTED' ? 'Selected' : s.charAt(0) + s.slice(1).toLowerCase()}</button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Filter size={12} />
+                <span>Sort by:</span>
+                {(['submittedAt', 'teamName', 'leaderName', 'college', 'status'] as const).map((col) => (
+                  <button
+                    key={col}
+                    type="button"
+                    className={`px-2 py-0.5 rounded border text-xs transition-colors ${compendiumSortBy === col ? 'border-gold text-gold bg-gold/10' : 'border-border hover:border-gold/50'}`}
+                    onClick={() => {
+                      if (compendiumSortBy === col) setCompendiumSortOrder(compendiumSortOrder === -1 ? 1 : -1);
+                      else { setCompendiumSortBy(col); setCompendiumSortOrder(-1); }
+                    }}
+                  >
+                    {col === 'submittedAt' ? 'Date' : col === 'teamName' ? 'Team' : col === 'leaderName' ? 'Leader' : col === 'college' ? 'College' : 'Status'}{sortIcon(col)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Team Table */}
+            <div className="yds-card overflow-hidden">
+              {compendiumQuery.isLoading ? (
+                <div className="p-12 text-center text-muted-foreground text-sm">Loading compendium data…</div>
+              ) : compTeams.length === 0 ? (
+                <div className="p-12 text-center text-muted-foreground text-sm">No teams found matching current filters.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="comp-table">
+                    <thead>
+                      <tr>
+                        <th>S.No</th>
+                        <th>App ID</th>
+                        <th>Team Name</th>
+                        <th>Status</th>
+                        <th>Leader / Member 1</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>College</th>
+                        <th>Year</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {compTeams.map((team: any) => (
+                        <Fragment key={team.id}>
+                          {/* Leader row */}
+                          <tr className={expandedTeamId === team.id ? 'comp-row expanded' : 'comp-row'}>
+                            <td className="text-muted-foreground text-xs">{team.sNo}</td>
+                            <td><span className="yds-app-id">{team.applicationId}</span></td>
+                            <td className="font-semibold">{team.teamName}</td>
+                            <td><span className={statusChipClass(team.displayStatus)}>{team.displayStatus}</span></td>
+                            <td className="font-medium">{team.members?.[0]?.fullName ?? '—'}</td>
+                            <td className="text-xs text-muted-foreground">{team.members?.[0]?.email ?? '—'}</td>
+                            <td className="text-xs font-mono">{team.members?.[0]?.contactNumber ?? '—'}</td>
+                            <td className="text-xs">{team.members?.[0]?.college ?? '—'}</td>
+                            <td className="text-xs">{team.members?.[0]?.yearOfStudy ?? '—'}</td>
+                            <td>
+                              <button
+                                type="button"
+                                className="comp-expand-btn"
+                                onClick={() => setExpandedTeamId(expandedTeamId === team.id ? null : team.id)}
+                                title="Show all members"
+                              >
+                                <ChevronDown size={14} className={expandedTeamId === team.id ? 'rotate-180 transition-transform' : 'transition-transform'} />
+                              </button>
+                            </td>
+                          </tr>
+                          {/* Expanded member rows */}
+                          {expandedTeamId === team.id && team.members?.slice(1).map((m: any, mi: number) => (
+                            <tr key={`${team.id}-m${mi + 2}`} className="comp-row-member">
+                              <td colSpan={4} className="text-xs text-muted-foreground pl-8">Member {mi + 2}</td>
+                              <td className="font-medium text-sm">{m.fullName ?? '—'}</td>
+                              <td className="text-xs text-muted-foreground">{m.email ?? '—'}</td>
+                              <td className="text-xs font-mono">{m.contactNumber ?? '—'}</td>
+                              <td className="text-xs">{m.college ?? '—'}</td>
+                              <td className="text-xs">{m.yearOfStudy ?? '—'}</td>
+                              <td></td>
+                            </tr>
+                          ))}
+                        </Fragment>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Pagination */}
+            {compTotalPages > 1 && (
+              <div className="flex items-center justify-center gap-2">
+                <Button size="sm" variant="outline" disabled={compendiumPage <= 1} onClick={() => setCompendiumPage(p => p - 1)}>← Prev</Button>
+                <span className="text-xs text-muted-foreground">Page {compendiumPage} of {compTotalPages}</span>
+                <Button size="sm" variant="outline" disabled={compendiumPage >= compTotalPages} onClick={() => setCompendiumPage(p => p + 1)}>Next →</Button>
+              </div>
+            )}
+
+            {/* Export Modal */}
+            {showExportModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                <div className="yds-card p-8 w-full max-w-md space-y-5 shadow-2xl">
+                  <h3 className="font-serif text-xl">Export Compendium as CSV</h3>
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input type="checkbox" checked={exportIncludeParty} onChange={(e) => setExportIncludeParty(e.target.checked)} />
+                      Include Party Allocation column
+                    </label>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {['ALL', 'ACCEPTED', 'WAITLISTED', 'DECLINED', 'PENDING'].map((s) => (
+                      <Button key={s} size="sm" variant="outline" disabled={isExportingCompendium}
+                        onClick={() => handleCompendiumCsvExport(s)}>
+                        <Download size={12} className="mr-1" />
+                        {s === 'ALL' ? 'All Teams' : s === 'ACCEPTED' ? 'Selected Only' : s.charAt(0) + s.slice(1).toLowerCase()} CSV
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="flex justify-end">
+                    <Button variant="outline" size="sm" onClick={() => setShowExportModal(false)}>Close</Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+        );
+      })()}
+
       {/* ── TAB: SPONSORS ────────────────────────────────────────────────── */}
       {activeTab === 'sponsors' && (
         <section className="space-y-6 animate-in fade-in-50">
@@ -1408,6 +1694,30 @@ function AdminPanel() {
               </div>
             </div>
           </div>
+
+          {/* Danger Zone — Super Admin Only */}
+          {isSuperAdmin && (
+            <div className="yds-card p-6 border-destructive/40 space-y-3">
+              <div>
+                <span className="eyebrow text-destructive">DANGER ZONE · SUPER ADMIN ONLY</span>
+                <h3 className="font-serif text-xl text-destructive mt-1">Clear All Applications</h3>
+                <p className="text-xs text-muted-foreground mt-1 max-w-lg">
+                  Permanently deletes <strong>all</strong> application documents from the database. Use this to remove mock/test data before the event goes live.
+                  This action is <strong>irreversible</strong>. An audit log entry will be created.
+                </p>
+              </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={isClearingApps}
+                onClick={handleClearApplications}
+                className="gap-2"
+              >
+                <Trash2 size={14} />
+                {isClearingApps ? 'Deleting…' : 'Clear All Applications'}
+              </Button>
+            </div>
+          )}
         </section>
       )}
 
