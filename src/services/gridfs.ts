@@ -1,7 +1,6 @@
 import { Readable } from 'stream';
 import { ObjectId } from 'mongodb';
 import { createHash } from 'crypto';
-import sharp from 'sharp';
 import { getGridFsBucket } from './mongo-client';
 
 export interface GridFSUploadResult {
@@ -15,38 +14,13 @@ export async function uploadImageToGridFS(
   buffer: Buffer,
   filename: string,
   contentType: string,
-  kind?: 'logo' | 'portrait',
+  _kind?: 'logo' | 'portrait',
 ): Promise<GridFSUploadResult> {
   const bucket = await getGridFsBucket();
 
-  let finalBuffer = buffer;
-  let finalContentType = contentType;
-  let finalFilename = filename;
-
-  // Process raster images with sharp (skip svg)
-  if (contentType !== 'image/svg+xml' && !filename.toLowerCase().endsWith('.svg')) {
-    try {
-      if (kind === 'portrait') {
-        finalBuffer = await sharp(buffer)
-          .resize(800, 1000, { fit: 'inside', withoutEnlargement: true })
-          .webp({ quality: 82 })
-          .toBuffer();
-      } else {
-        // default or logo
-        finalBuffer = await sharp(buffer)
-          .resize(400, 400, { fit: 'inside', withoutEnlargement: true })
-          .webp({ quality: 80 })
-          .toBuffer();
-      }
-      finalContentType = 'image/webp';
-      finalFilename = filename.replace(/\.[^/.]+$/, '') + '.webp';
-    } catch (sharpErr) {
-      console.warn('[GridFS] Sharp processing fallback to original buffer:', sharpErr);
-      finalBuffer = buffer;
-      finalContentType = contentType;
-      finalFilename = filename;
-    }
-  }
+  const finalBuffer = buffer;
+  const finalContentType = contentType;
+  const finalFilename = filename;
 
   // SHA-256 hash for deduplication
   const sha256 = createHash('sha256').update(finalBuffer).digest('hex');
