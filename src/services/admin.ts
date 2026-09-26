@@ -931,7 +931,7 @@ export async function exportCompendium(
 // ── Clear All Applications (Super Admin only) ─────────────────────────────────
 export async function clearAllApplications(idToken: string): Promise<{ deletedCount: number }> {
   const admin = await requireSuperAdminByToken(idToken);
-  const db = await getDb();
+  const db = await getMongoDb();
   const result = await db.collection('applications').deleteMany({});
   await db.collection('auditLogs').insertOne({
     collection: 'applications',
