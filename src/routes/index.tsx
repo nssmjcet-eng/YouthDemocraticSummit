@@ -47,40 +47,144 @@ export const Route = createFileRoute('/')({
         type: 'application/ld+json',
         children: JSON.stringify({
           '@context': 'https://schema.org',
-          '@type': 'Event',
-          name: 'Youth Democratic Summit 2026 (YDS 2026)',
-          description:
-            'A premier parliamentary simulation and youth democracy summit organized by NSS MJCET in Hyderabad.',
-          startDate: '2026-10-15T09:00:00+05:30',
-          endDate: '2026-10-16T18:00:00+05:30',
-          eventStatus: 'https://schema.org/EventScheduled',
-          eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-          location: {
-            '@type': 'Place',
-            name: 'Muffakham Jah College of Engineering and Technology (MJCET)',
-            address: {
-              '@type': 'PostalAddress',
-              streetAddress: 'Mount Pleasant, 8-2-249 to 267, Road No. 3, Banjara Hills',
-              addressLocality: 'Hyderabad',
-              addressRegion: 'Telangana',
-              postalCode: '500034',
-              addressCountry: 'IN',
+          '@graph': [
+            {
+              '@type': 'WebSite',
+              '@id': 'https://www.ydsnssmjcet.in/#website',
+              url: 'https://www.ydsnssmjcet.in/',
+              name: 'Youth Democratic Summit (YDS 2026)',
+              alternateName: ['YDS 2026', 'YDS NSS MJCET', 'Youth Democratic Summit'],
+              description: 'Official portal for Youth Democratic Summit (YDS 2026) organised by NSS MJCET, Hyderabad.',
+              publisher: {
+                '@type': 'Organization',
+                name: 'NSS MJCET',
+                url: 'https://www.ydsnssmjcet.in',
+                logo: 'https://www.ydsnssmjcet.in/yds-logo.png',
+              },
             },
-          },
-          image: ['https://www.ydsnssmjcet.in/yds-logo.png'],
-          organizer: {
-            '@type': 'Organization',
-            name: 'NSS MJCET',
-            url: 'https://www.ydsnssmjcet.in',
-          },
-          offers: {
-            '@type': 'Offer',
-            price: '0',
-            priceCurrency: 'INR',
-            availability: 'https://schema.org/InStock',
-            url: 'https://www.ydsnssmjcet.in/register',
-            validFrom: '2026-09-01T00:00:00+05:30',
-          },
+            {
+              '@type': 'SiteNavigationElement',
+              '@id': 'https://www.ydsnssmjcet.in/#sitenav',
+              name: [
+                'Team Registration',
+                'About the Summit',
+                'Parliamentary Proceedings',
+                'Schedule & Venue',
+                'Political Parties',
+                'Organising Committee',
+                'Summit Sponsors',
+                'Election Results',
+              ],
+              url: [
+                'https://www.ydsnssmjcet.in/register',
+                'https://www.ydsnssmjcet.in/#about',
+                'https://www.ydsnssmjcet.in/#experience',
+                'https://www.ydsnssmjcet.in/#schedule',
+                'https://www.ydsnssmjcet.in/#parties',
+                'https://www.ydsnssmjcet.in/#organisers',
+                'https://www.ydsnssmjcet.in/#sponsors',
+                'https://www.ydsnssmjcet.in/#results',
+              ],
+            },
+            {
+              '@type': 'ItemList',
+              name: 'YDS 2026 Summit Sections',
+              itemListElement: [
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 1,
+                  name: 'Team Registration',
+                  description: 'Official 5-member team registration portal for YDS 2026. Free registration.',
+                  url: 'https://www.ydsnssmjcet.in/register',
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 2,
+                  name: 'About the Summit',
+                  description: 'Vision, legislative format, and core ethos of the Youth Democratic Summit by NSS MJCET.',
+                  url: 'https://www.ydsnssmjcet.in/#about',
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 3,
+                  name: 'Parliamentary Proceedings',
+                  description: 'Lok Sabha, Rajya Sabha, Question Hour, Bills, Motions, and Coalition floor strategy.',
+                  url: 'https://www.ydsnssmjcet.in/#experience',
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 4,
+                  name: 'Schedule & Venue',
+                  description: 'Confirmed event dates, timings, and MJCET Banjara Hills campus venue.',
+                  url: 'https://www.ydsnssmjcet.in/#schedule',
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 5,
+                  name: 'Political Parties',
+                  description: '25 fictional parliamentary parties, ideological coalitions, and party manifestos.',
+                  url: 'https://www.ydsnssmjcet.in/#parties',
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 6,
+                  name: 'Organising Committee',
+                  description: 'NSS MJCET leadership, student convenors, and organizing committee.',
+                  url: 'https://www.ydsnssmjcet.in/#organisers',
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 7,
+                  name: 'Summit Sponsors',
+                  description: 'Official partners and sponsors backing the Youth Democratic Summit 2026.',
+                  url: 'https://www.ydsnssmjcet.in/#sponsors',
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 8,
+                  name: 'Election Results',
+                  description: 'Official team acceptance and party allocation results for YDS 2026.',
+                  url: 'https://www.ydsnssmjcet.in/#results',
+                },
+              ],
+            },
+            {
+              '@type': 'Event',
+              name: 'Youth Democratic Summit 2026 (YDS 2026)',
+              description:
+                'A premier parliamentary simulation and youth democracy summit organized by NSS MJCET in Hyderabad.',
+              startDate: '2026-10-15T09:00:00+05:30',
+              endDate: '2026-10-16T18:00:00+05:30',
+              eventStatus: 'https://schema.org/EventScheduled',
+              eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+              location: {
+                '@type': 'Place',
+                name: 'Muffakham Jah College of Engineering and Technology (MJCET)',
+                address: {
+                  '@type': 'PostalAddress',
+                  streetAddress: 'Mount Pleasant, 8-2-249 to 267, Road No. 3, Banjara Hills',
+                  addressLocality: 'Hyderabad',
+                  addressRegion: 'Telangana',
+                  postalCode: '500034',
+                  addressCountry: 'IN',
+                },
+              },
+              image: ['https://www.ydsnssmjcet.in/yds-logo.png'],
+              organizer: {
+                '@type': 'Organization',
+                name: 'NSS MJCET',
+                url: 'https://www.ydsnssmjcet.in',
+              },
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'INR',
+                availability: 'https://schema.org/InStock',
+                url: 'https://www.ydsnssmjcet.in/register',
+                validFrom: '2026-09-01T00:00:00+05:30',
+              },
+            },
+          ],
         }),
       },
     ],
@@ -187,7 +291,13 @@ function Home() {
     <main id="top"><Journey/>
       <header className="site-header">
         <a className="wordmark" href="#top" aria-label="Youth Democratic Summit, back to top"><img className="brand-logo" src={logo} alt="YDS NSS MJCET logo" width={44} height={44}/><span className="wordmark-title">YDS<br/>BY NSS MJCET</span></a>
-        <nav className={menuOpen ? 'main-nav open' : 'main-nav'} aria-label="Main navigation">{links.map(([label,href]) => <a href={href} key={label} onClick={() => setMenuOpen(false)}>{label}</a>)}</nav>
+        <nav className={menuOpen ? 'main-nav open' : 'main-nav'} aria-label="Main navigation" itemScope itemType="https://schema.org/SiteNavigationElement">
+          {links.map(([label, href]) => (
+            <a href={href} key={label} itemProp="url" onClick={() => setMenuOpen(false)}>
+              <span itemProp="name">{label}</span>
+            </a>
+          ))}
+        </nav>
         <Button asChild variant="outline" className="header-cta"><Link to="/register">REGISTER TEAM <ArrowRight size={15}/></Link></Button>
         <Button className="mobile-toggle" variant="ghost" size="icon" type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={25}/> : <Menu size={25}/>}</Button>
       </header>
@@ -253,23 +363,65 @@ function Home() {
       <DevelopersSection/>
     </main>
     <footer className="site-footer">
-      <div className="section-inner">
-        <a className="footer-title footer-brand" href="#top">
-          <img className="brand-logo" src={logo} alt="YDS NSS MJCET logo" width={44} height={44}/>
-          YOUTH DEMOCRATIC SUMMIT 2026 · NSS MJCET
-        </a>
-        <span>ENTER THE PARLIAMENT. FIND YOUR VOICE.</span>
-        <div className="footer-right">
-          <a
-            href={YDS_CONFIG.instagramUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-instagram"
-            aria-label="YDS NSS MJCET Instagram"
-            title="Follow YDS on Instagram"
-          >
-            <Instagram size={21} />
+      <div className="section-inner footer-grid">
+        <div className="footer-col brand-col">
+          <a className="footer-title footer-brand" href="#top">
+            <img className="brand-logo" src={logo} alt="YDS NSS MJCET logo" width={44} height={44}/>
+            YDS 2026 · NSS MJCET
           </a>
+          <p className="footer-tagline">
+            National Youth Parliament Simulation organised by NSS MJCET, Hyderabad.
+          </p>
+          <div className="footer-social-wrap">
+            <a
+              href={YDS_CONFIG.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-instagram"
+              aria-label="YDS NSS MJCET Instagram"
+              title="Follow YDS on Instagram"
+            >
+              <Instagram size={20} />
+            </a>
+            <span className="text-xs text-muted-foreground">@yds_nssmjcet</span>
+          </div>
+        </div>
+
+        <nav className="footer-col" aria-label="Summit Navigation" itemScope itemType="https://schema.org/SiteNavigationElement">
+          <h4 className="footer-heading">SUMMIT SECTIONS</h4>
+          <ul className="footer-links">
+            <li><a href="#about" itemProp="url"><span itemProp="name">About YDS</span></a></li>
+            <li><a href="#experience" itemProp="url"><span itemProp="name">Parliamentary Proceedings</span></a></li>
+            <li><a href="#schedule" itemProp="url"><span itemProp="name">Schedule &amp; Venue</span></a></li>
+            <li><a href="#parties" itemProp="url"><span itemProp="name">Political Parties</span></a></li>
+            <li><a href="#results" itemProp="url"><span itemProp="name">Election Results</span></a></li>
+          </ul>
+        </nav>
+
+        <nav className="footer-col" aria-label="Participation and Leadership" itemScope itemType="https://schema.org/SiteNavigationElement">
+          <h4 className="footer-heading">PARTICIPATION</h4>
+          <ul className="footer-links">
+            <li><Link to="/register" itemProp="url"><span itemProp="name">Register Your Team</span></Link></li>
+            <li><a href="#organisers" itemProp="url"><span itemProp="name">Organising Committee</span></a></li>
+            <li><a href="#sponsors" itemProp="url"><span itemProp="name">Summit Sponsors</span></a></li>
+            <li><a href="#developers" itemProp="url"><span itemProp="name">Developers</span></a></li>
+          </ul>
+        </nav>
+
+        <div className="footer-col">
+          <h4 className="footer-heading">VENUE &amp; CONTACT</h4>
+          <p className="footer-address">
+            Muffakham Jah College of Engineering &amp; Technology<br/>
+            Mount Pleasant, Road No. 3, Banjara Hills<br/>
+            Hyderabad, Telangana 500034<br/>
+            <span className="block mt-2 text-gold">nssmjcet@mjcollege.ac.in</span>
+          </p>
+        </div>
+      </div>
+
+      <div className="footer-bottom">
+        <div className="section-inner footer-bottom-inner">
+          <span>© 2026 YOUTH DEMOCRATIC SUMMIT · NSS MJCET</span>
           <a href="#top">BACK TO TOP ↑</a>
         </div>
       </div>
