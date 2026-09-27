@@ -119,7 +119,7 @@ export function PublicSections() {
       <section id="results" className="section public-section">
         <div className="section-inner">
           <Heading
-            n="04 / RESULTS"
+            n="08 / RESULTS"
             tag="OFFICIAL SELECTION"
             eyebrow="THE RESULTS"
             title="Selected Teams"
@@ -158,11 +158,11 @@ export function PublicSections() {
       </section>
 
 
-      {/* SECTION 05: PARTIES */}
+      {/* SECTION 09: PARTIES */}
       <section id="parties" className="section public-section alt">
         <div className="section-inner">
           <Heading
-            n="05 / PARTIES"
+            n="09 / PARTIES"
             tag="25 PARLIAMENTARY PARTIES"
             eyebrow="THE HOUSE"
             title="The 25 Parties"
@@ -201,11 +201,11 @@ export function PublicSections() {
         </div>
       </section>
 
-      {/* SECTION 06: SPONSORS */}
+      {/* SECTION 10: SPONSORS */}
       <section id="sponsors" className="section public-section">
         <div className="section-inner">
           <Heading
-            n="06 / SPONSORS & PARTNERS"
+            n="10 / SPONSORS & PARTNERS"
             tag="COLLABORATION"
             eyebrow="SUPPORTED BY"
             title="Our Sponsors"
@@ -293,12 +293,12 @@ export function CommunitySections() {
 
   return (
     <>
-      {/* SECTION 07: ORGANISERS */}
+      {/* SECTION 12: ORGANISERS */}
       {organisers.length > 0 && (
         <section id="organisers" className="section public-section alt">
           <div className="section-inner">
             <Heading
-              n="07 / ORGANISERS"
+              n="12 / ORGANISERS"
               tag="NSS MJCET · YDS 2026"
               eyebrow="ORGANISING COMMITTEE"
               title="The Organisers"
@@ -345,12 +345,12 @@ export function CommunitySections() {
         </section>
       )}
 
-      {/* SECTION 08: CO-ORGANISERS */}
+      {/* SECTION 13: CO-ORGANISERS */}
       {coOrganisers.length > 0 && (
         <section id="co-organisers" className="section public-section">
           <div className="section-inner">
             <Heading
-              n="08 / CO-ORGANISERS"
+              n="13 / CO-ORGANISERS"
               tag="NSS MJCET · YDS 2026"
               eyebrow="CO-ORGANISING COMMITTEE"
               title="The Co-Organisers"
@@ -416,7 +416,7 @@ export function DevelopersSection() {
     <section id="developers" className="section public-section alt">
       <div className="section-inner">
         <div className="section-topline">
-          <span>10 / DEVELOPERS</span>
+          <span>14 / DEVELOPERS</span>
           <span>BUILT WITH CARE</span>
         </div>
         <span className="eyebrow">DEVELOPED BY</span>

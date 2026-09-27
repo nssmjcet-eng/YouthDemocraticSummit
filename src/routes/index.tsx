@@ -11,6 +11,8 @@ import vestibule from '@/assets/parliament-vestibule.jpg';
 import logo from '@/assets/nss-logo.png';
 import { PublicSections, CommunitySections, DevelopersSection } from '@/components/PublicSections';
 import { YDS_CONFIG } from '@/config/yds';
+import { NssSection } from '@/components/NssSection';
+import { ParliamentaryJourney } from '@/components/ParliamentaryJourney';
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -278,14 +280,17 @@ const parliamentaryProceedings = [
 function Home() {
   const [menuOpen,setMenuOpen] = useState(false);
   const links = [
-    ['About','#about'],
-    ['Experience','#experience'],
-    ['Details','#schedule'],
-    ['Results','#results'],
-    ['Parties','#parties'],
-    ['Sponsors','#sponsors'],
-    ['Organisers','#organisers'],
-    ['Register','#register'],
+    ['NSS MJCET', '#nss'],
+    ['About', '#about'],
+    ['Details', '#schedule'],
+    ['Journey', '#journey'],
+    ['Lok Sabha', '#lok-sabha'],
+    ['The Bill', '#legislative-journey'],
+    ['The House', '#the-house'],
+    ['Parties', '#parties'],
+    ['Sponsors', '#sponsors'],
+    ['Organisers', '#organisers'],
+    ['Register', '#register'],
   ];
   return <>
     <main id="top"><Journey/>
@@ -301,15 +306,27 @@ function Home() {
         <Button asChild variant="outline" className="header-cta"><Link to="/register">REGISTER TEAM <ArrowRight size={15}/></Link></Button>
         <Button className="mobile-toggle" variant="ghost" size="icon" type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={25}/> : <Menu size={25}/>}</Button>
       </header>
-      <section id="about" className="section about-section"><div className="section-inner"><div className="section-topline"><span>01 / THE IDEA</span><span>YDS 2026 · NSS MJCET</span></div><div className="about-layout"><div><span className="eyebrow">ABOUT THE SUMMIT</span><h2>A seat at the table.<br/><em>A voice in the room.</em></h2></div><div className="about-body"><p className="lead">The next generation deserves more than a lesson in democracy. It deserves a chance to practise it.</p><p>The Youth Democratic Summit (YDS 2026), organised by the National Service Scheme (NSS), Muffakham Jah College of Engineering &amp; Technology (MJCET), Hyderabad, is a premier National Youth Parliament Simulation designed to recreate the sacred halls of Indian democracy.</p><p className="mt-3">Across 125 selected Members of Parliament divided into 25 fictional parliamentary parties, participants will engage in parliamentary debate, introduce bills, and debate the future of the republic.</p><a className="text-link" href="#experience">EXPLORE THE EXPERIENCE <ArrowRight size={17}/></a></div></div></div></section>
-      <section id="experience" className="section experience-section"><div className="section-inner"><div className="section-topline"><span>02 / WHAT AWAITS YOU</span><span>LOK SABHA · RAJYA SABHA · DEBATE</span></div><div className="section-heading"><span className="eyebrow">PARLIAMENTARY PROCEEDINGS</span><h2>Inside the chamber.<br/><em>Democracy in motion.</em></h2></div><div className="benefits">{parliamentaryProceedings.map(([number,title,description]) => <article className="benefit" key={number}><span className="benefit-number">{number}</span><div><h3>{title}</h3><p>{description}</p></div><ArrowRight className="benefit-arrow" size={18} strokeWidth={1.5}/></article>)}</div></div></section>
+
+      {/* 1. NSS MJCET: First informational section immediately after Hero/Navbar */}
+      <NssSection />
+
+      {/* 2. ABOUT YDS */}
+      <section id="about" className="section about-section"><div className="section-inner"><div className="section-topline"><span>02 / THE IDEA</span><span>YDS 2026 · NSS MJCET</span></div><div className="about-layout"><div><span className="eyebrow">ABOUT THE SUMMIT</span><h2>A seat at the table.<br/><em>A voice in the room.</em></h2></div><div className="about-body"><p className="lead">The next generation deserves more than a lesson in democracy. It deserves a chance to practise it.</p><p>The Youth Democratic Summit (YDS 2026), organised by the National Service Scheme (NSS), Muffakham Jah College of Engineering &amp; Technology (MJCET), Hyderabad, is a premier National Youth Parliament Simulation designed to recreate the sacred halls of Indian democracy.</p><p className="mt-3">Across 125 selected Members of Parliament divided into 25 fictional parliamentary parties, participants will engage in parliamentary debate, introduce bills, and debate the future of the republic.</p><a className="text-link" href="#journey">EXPLORE THE PARLIAMENTARY JOURNEY <ArrowRight size={17}/></a></div></div></div></section>
+
+      {/* 3. KEY SUMMIT DETAILS */}
       <section id="schedule" className="section details-section"><div className="section-inner"><div className="section-topline"><span>03 / OFFICIAL EVENT DETAILS</span><span>OCTOBER 2026 · HYDERABAD</span></div><div className="details-layout"><div className="section-heading"><span className="eyebrow">OFFICIAL NOTICE</span><h2>Key Summit<br/><em>details.</em></h2><p>Official venue, dates and structure confirmed by the YDS 2026 Organising Committee.</p></div><div className="detail-list"><article><span>01 / DATES & TIMING</span><h3>{YDS_CONFIG.dates}</h3><p>{YDS_CONFIG.timing} daily. Three intense days of plenary debates and committee sessions.</p></article><article><span>02 / VENUE</span><h3>{YDS_CONFIG.venue}</h3><p>Mount Pleasant, 8-2-249 to 267, Road No. 3, Banjara Hills, Hyderabad, Telangana 500034.</p></article><article><span>03 / REGISTRATION FEE</span><h3>{YDS_CONFIG.registrationFee}</h3><p>Registration for YDS 2026 is completely free of charge. Participation is awarded strictly through competitive selection.</p></article><article><span>04 / STRUCTURE</span><h3>125 MPs across 25 Parties</h3><p>75 Lok Sabha MPs + 50 Rajya Sabha MPs. Each accepted team consists of exactly 5 members (3 Lok Sabha + 2 Rajya Sabha).</p></article></div></div></div></section>
+
+      {/* 4. THE YDS PARLIAMENTARY JOURNEY & LEGISLATIVE PROCEDURE */}
+      <ParliamentaryJourney />
+
+      {/* 5. PARTIES, SPONSORS & RESULTS */}
       <PublicSections/>
+
       <CommunitySections/>
       <section id="register" className="section register-section">
         <div className="section-inner">
           <div className="section-topline">
-            <span>09 / REGISTER FOR YDS 2026</span>
+            <span>11 / REGISTER FOR YDS 2026</span>
             <span>SELECTION-BASED APPLICATION</span>
           </div>
           <div className="register-landing-cta">
@@ -390,9 +407,13 @@ function Home() {
         <nav className="footer-col" aria-label="Summit Navigation" itemScope itemType="https://schema.org/SiteNavigationElement">
           <h4 className="footer-heading">SUMMIT SECTIONS</h4>
           <ul className="footer-links">
+            <li><a href="#nss" itemProp="url"><span itemProp="name">NSS MJCET</span></a></li>
             <li><a href="#about" itemProp="url"><span itemProp="name">About YDS</span></a></li>
-            <li><a href="#experience" itemProp="url"><span itemProp="name">Parliamentary Proceedings</span></a></li>
             <li><a href="#schedule" itemProp="url"><span itemProp="name">Schedule &amp; Venue</span></a></li>
+            <li><a href="#journey" itemProp="url"><span itemProp="name">Parliamentary Journey</span></a></li>
+            <li><a href="#lok-sabha" itemProp="url"><span itemProp="name">Lok Sabha Procedure</span></a></li>
+            <li><a href="#legislative-journey" itemProp="url"><span itemProp="name">Youth Employment Bill</span></a></li>
+            <li><a href="#the-house" itemProp="url"><span itemProp="name">The House Structure</span></a></li>
             <li><a href="#parties" itemProp="url"><span itemProp="name">Political Parties</span></a></li>
             <li><a href="#results" itemProp="url"><span itemProp="name">Election Results</span></a></li>
           </ul>
