@@ -147,16 +147,12 @@ function StructurePage() {
             Participation is free and awarded strictly through competitive team selection.
           </p>
           <div className="mt-8 flex justify-center gap-4 flex-wrap">
-            <Button asChild size="lg" className="header-cta bg-gold text-deep hover:bg-gold/90 font-bold px-8 py-3">
-              <Link to="/register">
-                REGISTER YOUR TEAM <ArrowRight size={16} />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="border-gold/40 text-ivory hover:bg-white/5 px-6">
-              <Link to="/">
-                RETURN TO HOMEPAGE
-              </Link>
-            </Button>
+            <Link to="/register" className="struct-primary-btn">
+              REGISTER YOUR TEAM <ArrowRight size={16} />
+            </Link>
+            <Link to="/" className="struct-outline-btn">
+              RETURN TO HOMEPAGE
+            </Link>
           </div>
         </div>
       </section>

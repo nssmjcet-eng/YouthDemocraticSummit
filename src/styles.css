@@ -2303,7 +2303,31 @@
    ========================================================================== */
 .lok-sabha-section {
   background: var(--ivory);
+  color: var(--foreground);
   padding-bottom: 120px;
+}
+
+.lok-sabha-section .section-topline {
+  color: var(--muted-foreground);
+  border-color: var(--border);
+}
+
+.lok-sabha-section .eyebrow {
+  color: #8c6b23 !important;
+}
+
+.lok-sabha-section h2,
+.lok-sabha-section .section-heading h2 {
+  color: var(--foreground) !important;
+}
+
+.lok-sabha-section h2 em,
+.lok-sabha-section .section-heading h2 em {
+  color: var(--foreground) !important;
+}
+
+.lok-sabha-section .public-lede {
+  color: var(--muted-foreground) !important;
 }
 
 .procedure-flow-grid {
@@ -2521,16 +2545,40 @@
    RAJYA SABHA PROCEDURE
    ========================================================================== */
 .rajya-sabha-section {
-  background: var(--card);
+  background: var(--ivory);
+  color: var(--foreground);
   padding-bottom: 120px;
   border-top: 1px solid var(--border);
 }
 
+.rajya-sabha-section .section-topline {
+  color: var(--muted-foreground);
+  border-color: var(--border);
+}
+
+.rajya-sabha-section .eyebrow {
+  color: #8c6b23 !important;
+}
+
+.rajya-sabha-section h2,
+.rajya-sabha-section .section-heading h2 {
+  color: var(--foreground) !important;
+}
+
+.rajya-sabha-section h2 em,
+.rajya-sabha-section .section-heading h2 em {
+  color: var(--foreground) !important;
+}
+
+.rajya-sabha-section .public-lede {
+  color: var(--muted-foreground) !important;
+}
+
 .rs-continuity-box {
-  background: var(--background);
+  background: var(--card);
   border: 1px solid var(--border);
   border-left: 3px solid var(--gold);
-  padding: 16px 20px;
+  padding: 18px 24px;
   margin-top: 32px;
 }
 
@@ -3060,7 +3108,31 @@
    ========================================================================== */
 .the-house-section {
   background: var(--ivory);
+  color: var(--foreground);
   padding-bottom: 120px;
+}
+
+.the-house-section .section-topline {
+  color: var(--muted-foreground);
+  border-color: var(--border);
+}
+
+.the-house-section .eyebrow {
+  color: #8c6b23 !important;
+}
+
+.the-house-section h2,
+.the-house-section .section-heading h2 {
+  color: var(--foreground) !important;
+}
+
+.the-house-section h2 em,
+.the-house-section .section-heading h2 em {
+  color: var(--foreground) !important;
+}
+
+.the-house-section .public-lede {
+  color: var(--muted-foreground) !important;
 }
 
 .officials-grid {
@@ -3349,6 +3421,55 @@
   color: oklch(0.8 0.015 83);
   max-width: 600px;
   margin: 0 auto;
+}
+
+.struct-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--gold) !important;
+  color: #0f172a !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  padding: 14px 28px !important;
+  border-radius: 2px !important;
+  border: 1px solid var(--gold) !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 4px 14px oklch(0 0 0 / 0.25);
+  text-decoration: none !important;
+}
+
+.struct-primary-btn:hover {
+  background: #facc15 !important;
+  color: #000000 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px oklch(0 0 0 / 0.35);
+}
+
+.struct-outline-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  color: var(--ivory) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  padding: 14px 24px !important;
+  border-radius: 2px !important;
+  border: 1px solid oklch(0.96 0.01 85 / 0.4) !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+}
+
+.struct-outline-btn:hover {
+  border-color: var(--gold) !important;
+  color: var(--gold) !important;
+  background: oklch(0.72 0.081 78 / 0.1) !important;
 }
 
 /* Homepage YDS Structure Teaser Card */
