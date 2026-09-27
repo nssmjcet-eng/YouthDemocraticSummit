@@ -64,7 +64,7 @@ function StructurePage() {
           </Link>
 
           <div className="hidden md:flex items-center gap-3">
-            <Button asChild variant="outline" size="sm" className="header-cta">
+            <Button asChild variant="outline" size="sm" className="header-cta" style={{ color: 'oklch(0.72 0.081 78)' }}>
               <Link to="/register">
                 REGISTER TEAM <ArrowRight size={14} />
               </Link>
@@ -138,19 +138,27 @@ function StructurePage() {
       {/* Bottom CTA Card */}
       <section className="structure-bottom-cta">
         <div className="section-inner text-center">
-          <span className="eyebrow">JOIN THE PARLIAMENT</span>
-          <h2 className="structure-cta-heading">
+          <span className="eyebrow" style={{ color: 'oklch(0.72 0.081 78)' }}>JOIN THE PARLIAMENT</span>
+          <h2 className="structure-cta-heading" style={{ color: 'oklch(0.965 0.013 82)' }}>
             Step onto the floor of the House.<br />
-            <em>Register your 5-member delegation.</em>
+            <em style={{ color: 'oklch(0.72 0.081 78)' }}>Register your 5-member delegation.</em>
           </h2>
-          <p className="structure-cta-sub">
+          <p className="structure-cta-sub" style={{ color: 'oklch(0.82 0.015 83)' }}>
             Participation is free and awarded strictly through competitive team selection.
           </p>
           <div className="mt-8 flex justify-center gap-4 flex-wrap">
-            <Link to="/register" className="struct-primary-btn">
+            <Link
+              to="/register"
+              className="struct-primary-btn"
+              style={{ color: '#0f172a', background: 'oklch(0.72 0.081 78)', textDecoration: 'none' }}
+            >
               REGISTER YOUR TEAM <ArrowRight size={16} />
             </Link>
-            <Link to="/" className="struct-outline-btn">
+            <Link
+              to="/"
+              className="struct-outline-btn"
+              style={{ color: 'oklch(0.965 0.013 82)', textDecoration: 'none' }}
+            >
               RETURN TO HOMEPAGE
             </Link>
           </div>

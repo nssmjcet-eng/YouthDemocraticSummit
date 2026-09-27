@@ -188,13 +188,13 @@ export function ParliamentaryJourney() {
           </div>
 
           <div className="section-heading">
-            <span className="eyebrow">CHAMBER ORDER OF BUSINESS</span>
-            <h2>
+            <span className="eyebrow" style={{ color: '#8c6b23' }}>CHAMBER ORDER OF BUSINESS</span>
+            <h2 style={{ color: '#1a1f2e' }}>
               Lok Sabha Structure
               <br />
-              <em>&amp; Parliamentary Procedure.</em>
+              <em style={{ color: '#1a1f2e' }}>&amp; Parliamentary Procedure.</em>
             </h2>
-            <p className="public-lede">
+            <p className="public-lede" style={{ color: '#4a5568' }}>
               Structured sequence inspired by Indian parliamentary practice, adapted for the 75 Lok Sabha MPs of YDS 2026.
             </p>
           </div>
@@ -309,13 +309,13 @@ export function ParliamentaryJourney() {
           </div>
 
           <div className="section-heading">
-            <span className="eyebrow">SECOND CHAMBER PROCEDURE</span>
-            <h2>
+            <span className="eyebrow" style={{ color: '#8c6b23' }}>SECOND CHAMBER PROCEDURE</span>
+            <h2 style={{ color: '#1a1f2e' }}>
               Rajya Sabha Structure
               <br />
-              <em>&amp; Bicameral Legislative Scrutiny.</em>
+              <em style={{ color: '#1a1f2e' }}>&amp; Bicameral Legislative Scrutiny.</em>
             </h2>
-            <p className="public-lede">
+            <p className="public-lede" style={{ color: '#4a5568' }}>
               Structured sequence for the 50 Rajya Sabha MPs of YDS 2026, dedicated to federal scrutiny, policy durability, and clause revisions on the same legislation.
             </p>
           </div>
@@ -740,13 +740,13 @@ export function ParliamentaryJourney() {
           </div>
 
           <div className="section-heading">
-            <span className="eyebrow">PROCEDURAL LEADERSHIP</span>
-            <h2>
+            <span className="eyebrow" style={{ color: '#8c6b23' }}>PROCEDURAL LEADERSHIP</span>
+            <h2 style={{ color: '#1a1f2e' }}>
               The Front of the Speaker
               <br />
-              <em>&amp; The House Officers.</em>
+              <em style={{ color: '#1a1f2e' }}>&amp; The House Officers.</em>
             </h2>
-            <p className="public-lede">
+            <p className="public-lede" style={{ color: '#4a5568' }}>
               The proceedings of YDS 2026 are conducted with strict adherence to decorum, managed by experienced student
               presiding officers, procedural advisors, and a dedicated 4-member legal panel.
             </p>
@@ -797,11 +797,11 @@ export function ParliamentaryJourney() {
           {/* Participant Journey Summary Box */}
           <div className="participant-journey-wrap">
             <div className="section-heading pt-10">
-              <span className="eyebrow">YOUR SUMMIT TRAJECTORY</span>
-              <h2>
+              <span className="eyebrow" style={{ color: '#8c6b23' }}>YOUR SUMMIT TRAJECTORY</span>
+              <h2 style={{ color: '#1a1f2e' }}>
                 Your Journey
                 <br />
-                <em>at YDS 2026.</em>
+                <em style={{ color: '#1a1f2e' }}>at YDS 2026.</em>
               </h2>
             </div>
 
