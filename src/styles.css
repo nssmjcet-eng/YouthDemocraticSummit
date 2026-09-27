@@ -2515,6 +2515,128 @@
 .bill-transition-notice p {
   font-size: 12.5px;
   line-height: 1.6;
+}
+
+/* ==========================================================================
+   RAJYA SABHA PROCEDURE
+   ========================================================================== */
+.rajya-sabha-section {
+  background: var(--card);
+  padding-bottom: 120px;
+  border-top: 1px solid var(--border);
+}
+
+.rs-continuity-box {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  padding: 16px 20px;
+  margin-top: 32px;
+}
+
+.rs-continuity-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.rs-continuity-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--foreground);
+  margin: 0;
+  font-style: italic;
+}
+
+.rs-pillars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.rs-pillar-item {
+  background: var(--background);
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+}
+
+.rs-pillar-title {
+  display: block;
+  font-size: 12.5px;
+  color: var(--foreground);
+  margin-bottom: 4px;
+}
+
+.rs-pillar-desc {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
+.chairperson-spotlight-box {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.chairperson-desc {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+  margin: 6px 0 0;
+}
+
+.rs-outcomes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.rs-outcome-card {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  background: var(--background);
+}
+
+.outcome-success {
+  border-left: 3px solid #10b981;
+}
+
+.outcome-warning {
+  border-left: 3px solid #f59e0b;
+}
+
+.outcome-danger {
+  border-left: 3px solid #ef4444;
+}
+
+.rs-outcome-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.rs-outcome-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+}
+
+.rs-outcome-label {
+  font-size: 12.5px;
+  color: var(--foreground);
+}
+
+.rs-outcome-desc {
+  font-size: 12px;
+  line-height: 1.55;
   color: var(--muted-foreground);
   margin: 0;
 }
@@ -3098,6 +3220,242 @@
     width: 100%;
   }
 }
+
+/* ==========================================================================
+   YDS STRUCTURE DEDICATED PAGE (/structure)
+   ========================================================================== */
+.structure-page-wrapper {
+  min-height: 100vh;
+  background: var(--deep);
+  color: var(--ivory);
+  display: flex;
+  flex-direction: column;
+}
+
+.structure-page-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: oklch(0.16 0.028 242 / 0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid oklch(0.96 0.01 85 / 0.15);
+  height: 64px;
+  display: flex;
+  align-items: center;
+}
+
+.structure-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.structure-hero-section {
+  padding: 50px 0 30px;
+  background: oklch(0.18 0.029 242);
+  border-bottom: 1px solid oklch(0.96 0.01 85 / 0.12);
+}
+
+.structure-hero-body {
+  padding: 30px 0 20px;
+  max-width: 900px;
+}
+
+.structure-hero-title {
+  font: 400 clamp(2.8rem, 5vw, 5.2rem)/0.96 var(--serif);
+  color: var(--ivory);
+  margin: 16px 0 20px;
+}
+
+.structure-hero-title em {
+  font-weight: 300;
+  color: var(--gold);
+}
+
+.structure-hero-desc {
+  font-size: clamp(15px, 1.3vw, 17.5px);
+  line-height: 1.8;
+  color: oklch(0.85 0.015 83);
+  margin: 0 0 32px;
+}
+
+.structure-metrics-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.struct-metric-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: oklch(0.24 0.026 242);
+  border: 1px solid oklch(0.72 0.081 78 / 0.3);
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ivory);
+  border-radius: 2px;
+}
+
+.structure-quick-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 20px;
+  border-top: 1px solid oklch(0.96 0.01 85 / 0.12);
+}
+
+.struct-nav-link {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  background: oklch(0.24 0.026 242);
+  border: 1px solid oklch(0.96 0.01 85 / 0.15);
+  padding: 8px 16px;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.struct-nav-link:hover {
+  background: var(--gold);
+  color: var(--deep);
+  border-color: var(--gold);
+}
+
+.structure-bottom-cta {
+  padding: 90px 0;
+  background: oklch(0.15 0.025 242);
+  border-top: 1px solid oklch(0.96 0.01 85 / 0.15);
+}
+
+.structure-cta-heading {
+  font: 400 clamp(2.4rem, 4vw, 3.8rem)/1.1 var(--serif);
+  color: var(--ivory);
+  margin: 16px 0;
+}
+
+.structure-cta-heading em {
+  font-weight: 300;
+  color: var(--gold);
+}
+
+.structure-cta-sub {
+  font-size: 15px;
+  color: oklch(0.8 0.015 83);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Homepage YDS Structure Teaser Card */
+.structure-preview-section {
+  background: var(--deep);
+  color: var(--ivory);
+  padding: 80px 0 100px;
+  border-bottom: 1px solid oklch(0.96 0.01 85 / 0.15);
+}
+
+.structure-preview-card {
+  background: oklch(0.22 0.025 242);
+  border: 1px solid oklch(0.72 0.081 78 / 0.35);
+  padding: clamp(32px, 5vw, 56px);
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: clamp(32px, 4vw, 64px);
+  align-items: center;
+}
+
+.structure-preview-title {
+  font: 400 clamp(2.2rem, 3.8vw, 3.4rem)/1.05 var(--serif);
+  color: var(--ivory);
+  margin: 12px 0 16px;
+}
+
+.structure-preview-desc {
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: oklch(0.85 0.015 83);
+  margin: 0 0 24px;
+}
+
+.structure-preview-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+  margin-bottom: 32px;
+}
+
+.struct-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ivory);
+}
+
+.structure-preview-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--gold);
+  color: var(--deep);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 14px 24px;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.structure-preview-cta-btn:hover {
+  background: oklch(0.8 0.09 78);
+  transform: translateY(-2px);
+}
+
+.structure-preview-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.struct-day-pill-card {
+  background: oklch(0.25 0.027 242);
+  border: 1px solid oklch(0.96 0.01 85 / 0.12);
+  border-left: 3px solid var(--gold);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.struct-day-tag {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--gold);
+}
+
+.struct-day-name {
+  font: 400 16px/1.2 var(--serif);
+  color: var(--ivory);
+}
+
+.struct-day-mps {
+  font-size: 11px;
+  color: oklch(0.75 0.015 83);
+}
+
+@media (max-width: 900px) {
+  .structure-preview-card {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 
 

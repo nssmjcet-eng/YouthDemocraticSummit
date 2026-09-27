@@ -246,28 +246,70 @@ export const PARLIAMENTARY_JOURNEY_CONFIG = {
   },
 
   rajyaSabhaProcedure: {
-    title: 'RAJYA SABHA CONTINUITY & SCRUTINY',
+    title: 'RAJYA SABHA PARLIAMENTARY STRUCTURE',
+    subtitle: 'Second Chamber Scrutiny & Bicameral Revision',
     continuityNote:
       'The Rajya Sabha does NOT draft or begin with a new bill. It receives the EXACT SAME Youth Employment, Skills & Opportunities Bill, 2026 passed by the Lok Sabha on Day Two, fulfilling bicameral scrutiny.',
     mpsCount: '50 Rajya Sabha MPs',
-    focusAreas: [
-      'Inter-state equity and federal implementation challenges',
-      'Fiscal feasibility and administrative burden on institutions',
-      'Moving constructive amendments to strengthen the Bill',
-      'Challenging haste and ensuring long-term generational sustainability',
+    date: '17 October 2026',
+    venue: 'Ghulam Ahmed Hall, MJCET',
+    time: '9:00 AM – 5:00 PM',
+    flow: [
+      { step: '01', title: 'House Assembly', desc: '50 Rajya Sabha MPs take designated seats in Ghulam Ahmed Hall.' },
+      { step: '02', title: 'Call to Order', desc: '“Honourable Members of the Council of States, the House is called to order.”' },
+      { step: '03', title: 'Opening by Chairperson', desc: 'Chairperson outlines business and sets decorum for elder chamber review.' },
+      { step: '04', title: 'Question Hour', desc: 'MPs question Ministers on statutory feasibility, executive execution, and state impact.' },
+      { step: '05', title: 'Supplementary Questions', desc: 'Probing follow-ups on federal funds, institutional capacity, and student rights.' },
+      { step: '06', title: 'Zero Hour in Upper House', desc: 'Members raise regional youth disparities and pressing university concerns.' },
+      { step: '07', title: 'Receipt of Lok Sabha Bill', desc: 'Table Officers lay the Bill passed by the Lok Sabha on the Table of the House.' },
+      { step: '08', title: 'Second Chamber Debate', desc: 'Senior parliamentarians dissect provisions with long-term and federal vision.' },
+      { step: '09', title: 'Upper House Amendments', desc: 'Members move clause amendments vetted by the 4-Member Legal Panel.' },
+      { step: '10', title: 'Minister’s Clarification', desc: 'Government Ministers address reservations raised by elder parliamentarians.' },
+      { step: '11', title: 'Rajya Sabha Voting', desc: 'Voice vote or formal division on clauses and final passage of the text.' },
+      { step: '12', title: 'Determination of Result', desc: 'Chair records: Passed by Both Houses OR Qualifying Deadlock.' },
     ],
-    possibleOutcomes: [
+    scrutinyPillars: [
       {
-        status: 'PASSED',
+        title: 'Federal Impact & Regional Balance',
+        desc: 'Ensuring youth employment guarantees, startup grants, and skill programs adapt equitably across states and non-metro hubs.',
+      },
+      {
+        title: 'Long-Term Fiscal Sustainability',
+        desc: 'Scrutinising corporate tax subsidies, apprentice stipend models, and sustained allocations beyond short-term fiscal cycles.',
+      },
+      {
+        title: 'Constructive Upper House Amendments',
+        desc: 'Strengthening grievance redressal mechanisms, independent monitoring bodies, and student worker workplace safeguards.',
+      },
+      {
+        title: 'Check on Legislative Haste',
+        desc: 'Providing reflective elder deliberation to refine statutory ambiguities without partisan posturing.',
+      },
+    ],
+    outcomes: [
+      {
+        status: 'PASSED BY RAJYA SABHA',
+        type: 'success',
         label: 'Approved by Both Houses',
-        desc: 'If Rajya Sabha votes in favour without disputed amendments, the Bill is declared successfully passed by both Houses, concluding the simulation.',
+        desc: 'If Rajya Sabha approves the Bill without unresolved amendments, the legislation is enacted as official YDS policy.',
       },
       {
-        status: 'REJECTED OR DEADLOCK',
-        label: 'Amendments Disputed / Bill Rejected',
-        desc: 'If Rajya Sabha rejects the Bill or passes amendments to which the Lok Sabha disagrees, the simulation enters the qualifying deadlock threshold.',
+        status: 'DISAGREEMENT ON AMENDMENTS',
+        type: 'warning',
+        label: 'Amendment Deadlock',
+        desc: 'If Rajya Sabha passes amendments not accepted by Lok Sabha, a qualifying deadlock occurs under published YDS rules.',
+      },
+      {
+        status: 'REJECTED BY RAJYA SABHA',
+        type: 'danger',
+        label: 'Full House Rejection',
+        desc: 'If the Upper Chamber rejects the text entirely, the Organising Committee may convene a simulated Joint Sitting of all 125 MPs.',
       },
     ],
+    chairpersonRole: {
+      title: 'The Chairperson of the Rajya Sabha',
+      desc: 'Presides over the Upper Chamber simulation, regulates debate decorum, ensures respectful bicameral examination, rules on procedural admissibility, and oversees division counts.',
+    },
   },
 
   jointSitting: {

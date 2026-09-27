@@ -283,14 +283,12 @@ function Home() {
     ['NSS MJCET', '#nss'],
     ['About', '#about'],
     ['Details', '#schedule'],
-    ['Journey', '#journey'],
-    ['Lok Sabha', '#lok-sabha'],
-    ['The Bill', '#legislative-journey'],
-    ['The House', '#the-house'],
+    ['YDS Structure', '/structure'],
     ['Parties', '#parties'],
+    ['Results', '#results'],
     ['Sponsors', '#sponsors'],
     ['Organisers', '#organisers'],
-    ['Register', '#register'],
+    ['Register', '/register'],
   ];
   return <>
     <main id="top"><Journey/>
@@ -298,9 +296,15 @@ function Home() {
         <a className="wordmark" href="#top" aria-label="Youth Democratic Summit, back to top"><img className="brand-logo" src={logo} alt="YDS NSS MJCET logo" width={44} height={44}/><span className="wordmark-title">YDS<br/>BY NSS MJCET</span></a>
         <nav className={menuOpen ? 'main-nav open' : 'main-nav'} aria-label="Main navigation" itemScope itemType="https://schema.org/SiteNavigationElement">
           {links.map(([label, href]) => (
-            <a href={href} key={label} itemProp="url" onClick={() => setMenuOpen(false)}>
-              <span itemProp="name">{label}</span>
-            </a>
+            href.startsWith('/') ? (
+              <Link to={href} key={label} onClick={() => setMenuOpen(false)}>
+                <span>{label}</span>
+              </Link>
+            ) : (
+              <a href={href} key={label} itemProp="url" onClick={() => setMenuOpen(false)}>
+                <span itemProp="name">{label}</span>
+              </a>
+            )
           ))}
         </nav>
         <Button asChild variant="outline" className="header-cta"><Link to="/register">REGISTER TEAM <ArrowRight size={15}/></Link></Button>
@@ -311,13 +315,85 @@ function Home() {
       <NssSection />
 
       {/* 2. ABOUT YDS */}
-      <section id="about" className="section about-section"><div className="section-inner"><div className="section-topline"><span>02 / THE IDEA</span><span>YDS 2026 · NSS MJCET</span></div><div className="about-layout"><div><span className="eyebrow">ABOUT THE SUMMIT</span><h2>A seat at the table.<br/><em>A voice in the room.</em></h2></div><div className="about-body"><p className="lead">The next generation deserves more than a lesson in democracy. It deserves a chance to practise it.</p><p>The Youth Democratic Summit (YDS 2026), organised by the National Service Scheme (NSS), Muffakham Jah College of Engineering &amp; Technology (MJCET), Hyderabad, is a premier National Youth Parliament Simulation designed to recreate the sacred halls of Indian democracy.</p><p className="mt-3">Across 125 selected Members of Parliament divided into 25 fictional parliamentary parties, participants will engage in parliamentary debate, introduce bills, and debate the future of the republic.</p><a className="text-link" href="#journey">EXPLORE THE PARLIAMENTARY JOURNEY <ArrowRight size={17}/></a></div></div></div></section>
+      <section id="about" className="section about-section"><div className="section-inner"><div className="section-topline"><span>02 / THE IDEA</span><span>YDS 2026 · NSS MJCET</span></div><div className="about-layout"><div><span className="eyebrow">ABOUT THE SUMMIT</span><h2>A seat at the table.<br/><em>A voice in the room.</em></h2></div><div className="about-body"><p className="lead">The next generation deserves more than a lesson in democracy. It deserves a chance to practise it.</p><p>The Youth Democratic Summit (YDS 2026), organised by the National Service Scheme (NSS), Muffakham Jah College of Engineering &amp; Technology (MJCET), Hyderabad, is a premier National Youth Parliament Simulation designed to recreate the sacred halls of Indian democracy.</p><p className="mt-3">Across 125 selected Members of Parliament divided into 25 fictional parliamentary parties, participants will engage in parliamentary debate, introduce bills, and debate the future of the republic.</p><Link className="text-link" to="/structure">EXPLORE YDS STRUCTURE &amp; PROCEDURE <ArrowRight size={17}/></Link></div></div></div></section>
 
       {/* 3. KEY SUMMIT DETAILS */}
       <section id="schedule" className="section details-section"><div className="section-inner"><div className="section-topline"><span>03 / OFFICIAL EVENT DETAILS</span><span>OCTOBER 2026 · HYDERABAD</span></div><div className="details-layout"><div className="section-heading"><span className="eyebrow">OFFICIAL NOTICE</span><h2>Key Summit<br/><em>details.</em></h2><p>Official venue, dates and structure confirmed by the YDS 2026 Organising Committee.</p></div><div className="detail-list"><article><span>01 / DATES & TIMING</span><h3>{YDS_CONFIG.dates}</h3><p>{YDS_CONFIG.timing} daily. Three intense days of plenary debates and committee sessions.</p></article><article><span>02 / VENUE</span><h3>{YDS_CONFIG.venue}</h3><p>Mount Pleasant, 8-2-249 to 267, Road No. 3, Banjara Hills, Hyderabad, Telangana 500034.</p></article><article><span>03 / REGISTRATION FEE</span><h3>{YDS_CONFIG.registrationFee}</h3><p>Registration for YDS 2026 is completely free of charge. Participation is awarded strictly through competitive selection.</p></article><article><span>04 / STRUCTURE</span><h3>125 MPs across 25 Parties</h3><p>75 Lok Sabha MPs + 50 Rajya Sabha MPs. Each accepted team consists of exactly 5 members (3 Lok Sabha + 2 Rajya Sabha).</p></article></div></div></div></section>
 
-      {/* 4. THE YDS PARLIAMENTARY JOURNEY & LEGISLATIVE PROCEDURE */}
-      <ParliamentaryJourney />
+      {/* 4. YDS STRUCTURE PREVIEW SHOWCASE */}
+      <section id="structure" className="section structure-preview-section">
+        <div className="section-inner">
+          <div className="section-topline">
+            <span>04 / YDS PARLIAMENTARY STRUCTURE</span>
+            <span>THREE DAYS · TWO HOUSES · ONE LEGISLATIVE JOURNEY</span>
+          </div>
+
+          <div className="structure-preview-card">
+            <div className="structure-preview-content">
+              <span className="eyebrow">SUMMIT ARCHITECTURE</span>
+              <h2 className="structure-preview-title">
+                YDS Structure<br />
+                <em>Three Days. Two Houses. One Journey.</em>
+              </h2>
+              <p className="structure-preview-desc">
+                Youth Democratic Summit 2026 is structured as a bicameral parliamentary simulation adapted from Indian
+                parliamentary practice. Experience the complete journey of representation — from taking the oath and
+                forming the government to Lok Sabha legislative debates, Rajya Sabha scrutiny on the same Bill, and a
+                simulated Joint Sitting of all 125 MPs.
+              </p>
+
+              <div className="structure-preview-features">
+                <div className="struct-feature-item">
+                  <span className="text-gold">▪</span>
+                  <span>125 MPs across 25 Political Parties</span>
+                </div>
+                <div className="struct-feature-item">
+                  <span className="text-gold">▪</span>
+                  <span>Day 1: Oath &amp; Government Formation</span>
+                </div>
+                <div className="struct-feature-item">
+                  <span className="text-gold">▪</span>
+                  <span>Day 2: Lok Sabha (75 MPs) Sitting</span>
+                </div>
+                <div className="struct-feature-item">
+                  <span className="text-gold">▪</span>
+                  <span>Day 3: Rajya Sabha (50 MPs) Scrutiny</span>
+                </div>
+                <div className="struct-feature-item">
+                  <span className="text-gold">▪</span>
+                  <span>Youth Employment &amp; Skills Bill, 2026</span>
+                </div>
+                <div className="struct-feature-item">
+                  <span className="text-gold">▪</span>
+                  <span>Simulated Joint Sitting (Article 108)</span>
+                </div>
+              </div>
+
+              <Link to="/structure" className="structure-preview-cta-btn">
+                EXPLORE COMPLETE YDS STRUCTURE &amp; PROCEDURE <ArrowRight size={16} />
+              </Link>
+            </div>
+
+            <div className="structure-preview-sidebar">
+              <div className="struct-day-pill-card">
+                <span className="struct-day-tag">DAY 01 · 15 OCT 2026</span>
+                <strong className="struct-day-name">Oath &amp; Government Formation</strong>
+                <span className="struct-day-mps">All 125 MPs · Seminar Hall, Block 4</span>
+              </div>
+              <div className="struct-day-pill-card">
+                <span className="struct-day-tag">DAY 02 · 16 OCT 2026</span>
+                <strong className="struct-day-name">Lok Sabha Legislative Sitting</strong>
+                <span className="struct-day-mps">75 MPs · Question Hour, Bill Debate &amp; Voting</span>
+              </div>
+              <div className="struct-day-pill-card">
+                <span className="struct-day-tag">DAY 03 · 17 OCT 2026</span>
+                <strong className="struct-day-name">Rajya Sabha &amp; Joint Sitting</strong>
+                <span className="struct-day-mps">50 MPs · Same Bill Scrutiny &amp; 125-MP Joint House</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* 5. PARTIES, SPONSORS & RESULTS */}
       <PublicSections/>

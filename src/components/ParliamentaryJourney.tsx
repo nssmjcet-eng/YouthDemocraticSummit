@@ -23,6 +23,7 @@ import { PARLIAMENTARY_JOURNEY_CONFIG, DayCard } from '@/config/parliamentaryJou
 export function ParliamentaryJourney() {
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   const [selectedFlowStep, setSelectedFlowStep] = useState<number | null>(null);
+  const [selectedRsStep, setSelectedRsStep] = useState<number | null>(null);
   const [activeTimelineStage, setActiveTimelineStage] = useState<string>('intro');
 
   const {
@@ -290,6 +291,115 @@ export function ParliamentaryJourney() {
                 <p>
                   Upon conclusion of Zero Hour, the Speaker directs the House to the listed legislative business:
                   the introduction of the central summit bill.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          SECTION: RAJYA SABHA PARLIAMENTARY STRUCTURE & SITTING FLOW
+          ========================================================================= */}
+      <section id="rajya-sabha" className="section rajya-sabha-section" aria-label="Rajya Sabha Structure">
+        <div className="section-inner">
+          <div className="section-topline">
+            <span>CHAMBER ORDER OF BUSINESS · ELDER SCRUTINY</span>
+            <span>50 MPS · COUNCIL OF STATES</span>
+          </div>
+
+          <div className="section-heading">
+            <span className="eyebrow">SECOND CHAMBER PROCEDURE</span>
+            <h2>
+              Rajya Sabha Structure
+              <br />
+              <em>&amp; Bicameral Legislative Scrutiny.</em>
+            </h2>
+            <p className="public-lede">
+              Structured sequence for the 50 Rajya Sabha MPs of YDS 2026, dedicated to federal scrutiny, policy durability, and clause revisions on the same legislation.
+            </p>
+          </div>
+
+          {/* Continuity Guarantee Callout */}
+          <div className="rs-continuity-box">
+            <div className="rs-continuity-badge">BICAMERAL CONTINUITY RULE</div>
+            <p className="rs-continuity-text">
+              &ldquo;{rajyaSabhaProcedure.continuityNote}&rdquo;
+            </p>
+          </div>
+
+          {/* Sequential Order of Business Grid for Rajya Sabha */}
+          <div className="procedure-flow-grid">
+            {rajyaSabhaProcedure.flow.map((step, idx) => (
+              <div
+                key={step.step}
+                className={`flow-card ${selectedRsStep === idx ? 'flow-card-active' : ''}`}
+                onClick={() => setSelectedRsStep(selectedRsStep === idx ? null : idx)}
+              >
+                <div className="flow-card-top">
+                  <span className="flow-step-num">{step.step}</span>
+                  <ChevronRight size={14} className="flow-chevron" />
+                </div>
+                <h4 className="flow-step-title">{step.title}</h4>
+                <p className="flow-step-desc">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* In-Depth Spotlight: Scrutiny Pillars & 3 Possible Legislative Outcomes */}
+          <div className="parliament-spotlight-grid">
+            {/* Scrutiny Pillars Card */}
+            <div className="spotlight-card">
+              <div className="spotlight-header">
+                <span className="spotlight-badge">ELDER CHAMBER OVERSIGHT</span>
+                <h3 className="spotlight-title">Pillars of Rajya Sabha Scrutiny</h3>
+              </div>
+              <p className="spotlight-desc">
+                The Council of States examines legislation through constitutional wisdom, federal balance, and long-term generational viability rather than hasty popular debate.
+              </p>
+
+              <div className="rs-pillars-list">
+                {rajyaSabhaProcedure.scrutinyPillars.map((p, idx) => (
+                  <div key={idx} className="rs-pillar-item">
+                    <strong className="rs-pillar-title">0{idx + 1}. {p.title}</strong>
+                    <p className="rs-pillar-desc">{p.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="chairperson-spotlight-box">
+                <span className="topics-label">PRESIDING DIGNITY:</span>
+                <p className="chairperson-desc">{rajyaSabhaProcedure.chairpersonRole.desc}</p>
+              </div>
+            </div>
+
+            {/* Three Legislative Outcomes & Deadlock Trigger */}
+            <div className="spotlight-card">
+              <div className="spotlight-header">
+                <span className="spotlight-badge">DAY THREE OUTCOME</span>
+                <h3 className="spotlight-title">Three Possible Legislative Outcomes</h3>
+              </div>
+              <p className="spotlight-desc">
+                Upon concluding debate and voting, the YDS Secretariat officially records one of three statutory determinations:
+              </p>
+
+              <div className="rs-outcomes-container">
+                {rajyaSabhaProcedure.outcomes.map((out, idx) => (
+                  <div key={idx} className={`rs-outcome-card outcome-${out.type}`}>
+                    <div className="rs-outcome-header">
+                      <span className="rs-outcome-badge">{out.status}</span>
+                      <strong className="rs-outcome-label">{out.label}</strong>
+                    </div>
+                    <p className="rs-outcome-desc">{out.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bill-transition-notice">
+                <span className="transition-label">SIMULATED JOINT SITTING TRIGGER:</span>
+                <p>
+                  If the Rajya Sabha rejects the Bill or the two Houses reach an irreconcilable deadlock on amendments,
+                  the simulation qualifies for convening a simulated Joint Sitting under Article 108 model.
                 </p>
               </div>
             </div>

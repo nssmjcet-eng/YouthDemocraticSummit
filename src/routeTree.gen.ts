@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as StructureRouteImport } from './routes/structure'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as PartiesPartyIdRouteImport } from './routes/parties.$partyId'
 
@@ -35,6 +36,11 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StructureRoute = StructureRouteImport.update({
+  id: '/structure',
+  path: '/structure',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -50,6 +56,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/register': typeof RegisterRoute
+  '/structure': typeof StructureRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/parties/$partyId': typeof PartiesPartyIdRoute
 }
@@ -57,6 +64,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/register': typeof RegisterRoute
+  '/structure': typeof StructureRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/parties/$partyId': typeof PartiesPartyIdRoute
 }
@@ -66,20 +74,24 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/register': typeof RegisterRoute
+  '/structure': typeof StructureRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/parties/$partyId': typeof PartiesPartyIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/register' | '/admin' | '/parties/$partyId'
+  fullPaths:
+    '/' | '/auth' | '/register' | '/structure' | '/admin' | '/parties/$partyId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/register' | '/admin' | '/parties/$partyId'
+  to:
+    '/' | '/auth' | '/register' | '/structure' | '/admin' | '/parties/$partyId'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/register'
+    | '/structure'
     | '/_authenticated/admin'
     | '/parties/$partyId'
   fileRoutesById: FileRoutesById
@@ -89,6 +101,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   RegisterRoute: typeof RegisterRoute
+  StructureRoute: typeof StructureRoute
   PartiesPartyIdRoute: typeof PartiesPartyIdRoute
 }
 
@@ -120,6 +133,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/structure': {
+      id: '/structure'
+      path: '/structure'
+      fullPath: '/structure'
+      preLoaderRoute: typeof StructureRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -155,6 +175,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   RegisterRoute: RegisterRoute,
+  StructureRoute: StructureRoute,
   PartiesPartyIdRoute: PartiesPartyIdRoute,
 }
 export const routeTree = rootRouteImport
