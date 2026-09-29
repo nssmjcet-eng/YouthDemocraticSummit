@@ -261,7 +261,7 @@ function Journey() {
         <span className="scroll-cue">SCROLL TO ENTER <ArrowDown size={17} strokeWidth={1.5}/></span>
       </div>
       <div className="entrance-copy" aria-hidden="true"><span className="eyebrow light-eyebrow">THE ENTRANCE</span><p>Every voice begins<br/>with a first step.</p><span className="scroll-cue">SCROLL TO ENTER <ArrowDown size={17} strokeWidth={1.5}/></span></div>
-      <div className="arrival-copy"><span className="eyebrow light-eyebrow">WELCOME INSIDE</span><h2>Enter the parliament.<br/><em>Find your voice.</em></h2><a href="#about" className="arrival-link">DISCOVER THE EXPERIENCE <ArrowRight size={17}/></a></div>
+      <div className="arrival-copy"><span className="eyebrow light-eyebrow">WELCOME INSIDE</span><h2>Enter the parliament.<br/><em>Find your voice.</em></h2><a href="#schedule" className="arrival-link">DISCOVER THE SUMMIT <ArrowRight size={17}/></a></div>
       <div className="journey-counter" aria-hidden="true"><span>01</span><span className="counter-track"><i/></span><span>06</span></div>
       <span className="journey-side" aria-hidden="true">ENTER THE PARLIAMENT · FIND YOUR VOICE</span>
     </div>
@@ -281,7 +281,6 @@ function Home() {
   const [menuOpen,setMenuOpen] = useState(false);
   const links = [
     ['NSS MJCET', '#nss'],
-    ['About', '#about'],
     ['Details', '#schedule'],
     ['YDS Structure', '/structure'],
     ['Parties', '#parties'],
@@ -314,17 +313,14 @@ function Home() {
       {/* 1. NSS MJCET: First informational section immediately after Hero/Navbar */}
       <NssSection />
 
-      {/* 2. ABOUT YDS */}
-      <section id="about" className="section about-section"><div className="section-inner"><div className="section-topline"><span>02 / THE IDEA</span><span>YDS 2026 · NSS MJCET</span></div><div className="about-layout"><div><span className="eyebrow">ABOUT THE SUMMIT</span><h2>A seat at the table.<br/><em>A voice in the room.</em></h2></div><div className="about-body"><p className="lead">The next generation deserves more than a lesson in democracy. It deserves a chance to practise it.</p><p>The Youth Democratic Summit (YDS 2026), organised by the National Service Scheme (NSS), Muffakham Jah College of Engineering &amp; Technology (MJCET), Hyderabad, is a premier National Youth Parliament Simulation designed to recreate the sacred halls of Indian democracy.</p><p className="mt-3">Across 125 selected Members of Parliament divided into 25 fictional parliamentary parties, participants will engage in parliamentary debate, introduce bills, and debate the future of the republic.</p><Link className="text-link" to="/structure">EXPLORE YDS STRUCTURE &amp; PROCEDURE <ArrowRight size={17}/></Link></div></div></div></section>
+      {/* 2. KEY SUMMIT DETAILS */}
+      <section id="schedule" className="section details-section"><div className="section-inner"><div className="section-topline"><span>02 / OFFICIAL EVENT DETAILS</span><span>OCTOBER 2026 · HYDERABAD</span></div><div className="details-layout"><div className="section-heading"><span className="eyebrow">OFFICIAL NOTICE</span><h2>Key Summit<br/><em>details.</em></h2><p>Official venue, dates and structure confirmed by the YDS 2026 Organising Committee.</p></div><div className="detail-list"><article><span>01 / DATES & TIMING</span><h3>{YDS_CONFIG.dates}</h3><p>{YDS_CONFIG.timing} daily. Three intense days of plenary debates and committee sessions.</p></article><article><span>02 / VENUE</span><h3>{YDS_CONFIG.venue}</h3><p>Mount Pleasant, 8-2-249 to 267, Road No. 3, Banjara Hills, Hyderabad, Telangana 500034.</p></article><article><span>03 / REGISTRATION FEE</span><h3>{YDS_CONFIG.registrationFee}</h3><p>Registration for YDS 2026 is completely free of charge. Participation is awarded strictly through competitive selection.</p></article><article><span>04 / STRUCTURE</span><h3>125 MPs across 25 Parties</h3><p>75 Lok Sabha MPs + 50 Rajya Sabha MPs. Each accepted team consists of exactly 5 members (3 Lok Sabha + 2 Rajya Sabha).</p></article></div></div></div></section>
 
-      {/* 3. KEY SUMMIT DETAILS */}
-      <section id="schedule" className="section details-section"><div className="section-inner"><div className="section-topline"><span>03 / OFFICIAL EVENT DETAILS</span><span>OCTOBER 2026 · HYDERABAD</span></div><div className="details-layout"><div className="section-heading"><span className="eyebrow">OFFICIAL NOTICE</span><h2>Key Summit<br/><em>details.</em></h2><p>Official venue, dates and structure confirmed by the YDS 2026 Organising Committee.</p></div><div className="detail-list"><article><span>01 / DATES & TIMING</span><h3>{YDS_CONFIG.dates}</h3><p>{YDS_CONFIG.timing} daily. Three intense days of plenary debates and committee sessions.</p></article><article><span>02 / VENUE</span><h3>{YDS_CONFIG.venue}</h3><p>Mount Pleasant, 8-2-249 to 267, Road No. 3, Banjara Hills, Hyderabad, Telangana 500034.</p></article><article><span>03 / REGISTRATION FEE</span><h3>{YDS_CONFIG.registrationFee}</h3><p>Registration for YDS 2026 is completely free of charge. Participation is awarded strictly through competitive selection.</p></article><article><span>04 / STRUCTURE</span><h3>125 MPs across 25 Parties</h3><p>75 Lok Sabha MPs + 50 Rajya Sabha MPs. Each accepted team consists of exactly 5 members (3 Lok Sabha + 2 Rajya Sabha).</p></article></div></div></div></section>
-
-      {/* 4. YDS STRUCTURE PREVIEW SHOWCASE */}
+      {/* 3. YDS STRUCTURE PREVIEW SHOWCASE */}
       <section id="structure" className="section structure-preview-section">
         <div className="section-inner">
           <div className="section-topline">
-            <span>04 / YDS PARLIAMENTARY STRUCTURE</span>
+            <span>03 / YDS PARLIAMENTARY STRUCTURE</span>
             <span>THREE DAYS · TWO HOUSES · ONE LEGISLATIVE JOURNEY</span>
           </div>
 

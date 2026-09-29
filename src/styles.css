@@ -368,11 +368,13 @@
     padding: 0 10px !important;
   }
   .register-form-surface {
-    border-radius: 4px !important;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25) !important;
+    max-width: calc(100% - 24px) !important;
+    margin: 0 auto !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18) !important;
   }
   .yds-team-form {
-    padding: 18px 12px !important;
+    padding: 16px 12px !important;
   }
   .form-head {
     flex-wrap: wrap !important;
@@ -647,7 +649,7 @@
 .footer-brand { display: inline-flex; align-items: center; gap: 12px; }
 
 /* Public sections */
-.public-section { background: var(--ivory); color: var(--deep); padding: 110px 0; }
+.public-section { background: var(--ivory); color: var(--deep); padding: 70px 0; }
 .public-section.alt { background: oklch(.93 .02 80); }
 .public-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 48px; }
 .public-item { background: var(--ivory); padding: 26px 22px; display: flex; flex-direction: column; gap: 10px; min-height: 150px; border: 1px solid oklch(.72 .081 78 / .25); border-radius: 4px; }
@@ -2021,8 +2023,30 @@
    ========================================================================== */
 .nss-section {
   background: var(--ivory);
-  padding: 40px 0 90px;
+  padding: 40px 0 60px;
   border-bottom: 1px solid var(--border);
+}
+
+.nss-compact-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.nss-value-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: oklch(.92 .02 80);
+  border: 1px solid oklch(.72 .081 78 / .3);
+  padding: 5px 11px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: var(--foreground);
+  border-radius: 2px;
+  text-transform: uppercase;
 }
 
 .nss-hero-grid {
