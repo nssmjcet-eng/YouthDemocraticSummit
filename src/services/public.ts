@@ -52,7 +52,8 @@ export async function fetchPublicData(bypassCache = false) {
       ideology: (p['ideology'] as string) || null,
       logoId: (p['logoId'] as string) || null,
       sortOrder: (p['sortOrder'] as number) ?? 99,
-      classification: (p['classification'] as string) || null,
+      classification:
+        ((p['classification'] as string) === 'INC' ? 'I.N.D.I.A' : (p['classification'] as string)) || null,
       formationDate: (p['formationDate'] as string) || null,
       historyDescription: (p['historyDescription'] as string) || null,
     })),
@@ -126,7 +127,8 @@ export async function fetchPartyById(id: string) {
     ideology: (party['ideology'] as string) || null,
     historyDescription: (party['historyDescription'] as string) || null,
     logoId: (party['logoId'] as string) || null,
-    classification: (party['classification'] as string) || null,
+    classification:
+      ((party['classification'] as string) === 'INC' ? 'I.N.D.I.A' : (party['classification'] as string)) || null,
     formationDate: (party['formationDate'] as string) || null,
     assignedTeamName: (party['assignedTeamName'] as string) || null,
     resultsReleased,

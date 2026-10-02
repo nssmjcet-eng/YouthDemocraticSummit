@@ -183,7 +183,9 @@ export function PublicSections() {
                   <h3>{p?.name ?? `Party ${String(i + 1).padStart(2, '0')}`}</h3>
                   <p>{p?.ideology ?? (p ? '' : 'Fictional Party — To be allocated')}</p>
                   {p?.classification && (
-                    <span className="party-card-classification">{p.classification}</span>
+                    <span className="party-card-classification">
+                      {p.classification === 'INC' ? 'I.N.D.I.A' : p.classification}
+                    </span>
                   )}
                 </article>
               );

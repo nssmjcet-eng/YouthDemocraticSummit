@@ -175,7 +175,12 @@ export async function getParties(idToken: string) {
   await requireAdminByToken(idToken);
   const db = await getMongoDb();
   const docs = await db.collection('parties').find({}).sort({ sortOrder: 1 }).toArray();
-  return docs.map((d) => ({ id: d._id.toString(), ...d, _id: undefined }));
+  return docs.map((d) => ({
+    id: d._id.toString(),
+    ...d,
+    classification: d.classification === 'INC' ? 'I.N.D.I.A' : d.classification,
+    _id: undefined,
+  }));
 }
 
 export async function upsertParty(

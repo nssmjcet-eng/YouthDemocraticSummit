@@ -100,7 +100,8 @@ function PartyDetailPage() {
     );
   }
 
-  const classificationColor = party.classification ? (CLASSIFICATION_COLOURS[party.classification] ?? '#6b7280') : '#6b7280';
+  const displayClassification = party.classification === 'INC' ? 'I.N.D.I.A' : party.classification;
+  const classificationColor = displayClassification ? (CLASSIFICATION_COLOURS[displayClassification] ?? '#6b7280') : '#6b7280';
 
   return (
     <div className="party-detail-page">
@@ -144,13 +145,13 @@ function PartyDetailPage() {
 
               {/* Info */}
               <div className="party-detail-hero-info">
-                {party.classification && (
+                {displayClassification && (
                   <span
                     className="party-classification-badge"
                     style={{ background: classificationColor + '22', color: classificationColor, borderColor: classificationColor + '55' }}
                   >
                     <Flag size={11} />
-                    {party.classification}
+                    {displayClassification}
                   </span>
                 )}
                 <span className="eyebrow" style={{ marginTop: 12 }}>PARLIAMENTARY PARTY</span>
@@ -186,13 +187,18 @@ function PartyDetailPage() {
                 <div className="party-detail-card">
                   <span className="eyebrow">ABOUT THE PARTY</span>
                   <p className="party-detail-text">
-                    {party.historyDescription.replace(/\r?\n/g, ' ').replace(/\s{2,}/g, ' ').trim()}
+                    {party.historyDescription
+                      .replace(/\bINC\b/g, 'I.N.D.I.A')
+                      .replace(/\bI\.N\.C\b/g, 'I.N.D.I.A')
+                      .replace(/\r?\n/g, ' ')
+                      .replace(/\s{2,}/g, ' ')
+                      .trim()}
                   </p>
                 </div>
               )}
 
               {/* Assignment */}
-              <div className="party-detail-card">
+              <div className="party-detail-card party-detail-team-card">
                 <span className="eyebrow">PARLIAMENTARY TEAM</span>
                 {party.resultsReleased && party.assignedTeam ? (
                   <div className="party-detail-team">
