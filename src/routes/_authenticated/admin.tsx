@@ -309,13 +309,13 @@ function AdminPanel() {
     },
   });
 
-  // ── Audit Logs ────────────────────────────────────────────────────────────
+  // ── Audit Logs (Super Admin only) ─────────────────────────────────────────
   const auditLogsQuery = useQuery({
     queryKey: ['admin-audit-logs'],
-    enabled: activeTab === 'audit',
+    enabled: isSuperAdmin && activeTab === 'audit',
     queryFn: async () => {
       const tok = idTokenFromCtx || await getIdToken() || '';
-      return adminGetAuditLogs({ data: { idToken: tok, limit: 100 } });
+      return adminGetAuditLogs({ data: { idToken: tok, limit: 500 } });
     },
   });
 
@@ -751,7 +751,6 @@ function AdminPanel() {
           ['co-organisers', 'Co-Organisers', coOrganisers.length],
           ['developers', 'Developers', null],
           ['storage', 'Storage & Backup', null],
-          ['audit', 'Audit Log', null],
         ] as [AdminNavTab, string, number | null][]).map(([tab, label, count]) => (
           <button
             key={tab}
@@ -765,13 +764,22 @@ function AdminPanel() {
           </button>
         ))}
         {isSuperAdmin && (
-          <button
-            type="button"
-            className={activeTab === 'admins' ? 'yds-nav-btn active' : 'yds-nav-btn'}
-            onClick={() => { setActiveTab('admins'); setSelectedAppId(null); }}
-          >
-            <Shield size={13} /> Admins
-          </button>
+          <>
+            <button
+              type="button"
+              className={activeTab === 'audit' ? 'yds-nav-btn active' : 'yds-nav-btn'}
+              onClick={() => { setActiveTab('audit'); setSelectedAppId(null); }}
+            >
+              <FileText size={13} /> Audit Log
+            </button>
+            <button
+              type="button"
+              className={activeTab === 'admins' ? 'yds-nav-btn active' : 'yds-nav-btn'}
+              onClick={() => { setActiveTab('admins'); setSelectedAppId(null); }}
+            >
+              <Shield size={13} /> Admins
+            </button>
+          </>
         )}
       </nav>
 
@@ -1800,27 +1808,77 @@ function AdminPanel() {
         </section>
       )}
 
-      {/* ── TAB: AUDIT LOG ────────────────────────────────────────────────── */}
-      {activeTab === 'audit' && (
+      {/* ── TAB: AUDIT LOG (SUPER ADMIN ONLY) ─────────────────────────────── */}
+      {isSuperAdmin && activeTab === 'audit' && (
         <section className="space-y-6 animate-in fade-in-50">
-          <div>
-            <span className="eyebrow">SYSTEM ACTIVITY</span>
-            <h2 className="font-serif text-2xl">Audit Log</h2>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <span className="eyebrow">SYSTEM INTEGRITY &amp; GOVERNANCE</span>
+              <h2 className="font-serif text-2xl flex items-center gap-2">
+                Audit Log
+                <span className="text-xs bg-gold/15 text-gold border border-gold/30 px-2 py-0.5 rounded font-sans font-semibold">
+                  SUPER ADMIN ACCESS
+                </span>
+              </h2>
+            </div>
+            {auditLogsQuery.data && (
+              <span className="text-xs text-muted-foreground">
+                Showing {auditLogsQuery.data.length} recorded events
+              </span>
+            )}
           </div>
+
           {auditLogsQuery.isLoading ? (
-            <p className="admin-note">Loading audit logs…</p>
+            <p className="admin-note">Loading system audit trail…</p>
+          ) : (auditLogsQuery.data ?? []).length === 0 ? (
+            <div className="yds-card p-8 text-center text-sm text-muted-foreground">
+              No audit log entries recorded yet.
+            </div>
           ) : (
-            <div className="space-y-2">
-              {(auditLogsQuery.data ?? []).map((log: any) => (
-                <div key={log.id} className="yds-card p-3 flex items-start gap-3 text-xs">
-                  <span className="text-muted-foreground min-w-[140px]">{new Date(log.timestamp).toLocaleString()}</span>
-                  <div className="flex-1">
-                    <span className="font-semibold">{log.action}</span>
-                    {log.adminEmail && <span className="ml-2 text-muted-foreground">by {log.adminEmail}</span>}
-                    {log.details && <p className="text-muted-foreground mt-0.5">{log.details}</p>}
+            <div className="space-y-2.5">
+              {(auditLogsQuery.data ?? []).map((log: any) => {
+                const act = (log.action || '').toUpperCase();
+                let badgeClass = 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/25';
+                if (act.includes('DELET') || act.includes('CLEAR') || act.includes('DEACTIVAT') || act.includes('DECLIN') || act.includes('REMOV')) {
+                  badgeClass = 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/25';
+                } else if (act.includes('ACCEPT') || act.includes('CREAT') || act.includes('ADD') || act.includes('RELEASE') || act.includes('ACTIVE')) {
+                  badgeClass = 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/25';
+                } else if (act.includes('STATUS') || act.includes('UPDAT') || act.includes('WAITLIST') || act.includes('HIDDEN')) {
+                  badgeClass = 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/25';
+                } else if (act.includes('ALLOCAT') || act.includes('EXPORT')) {
+                  badgeClass = 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/25';
+                }
+
+                return (
+                  <div key={log.id} className="yds-card p-3.5 flex flex-col sm:flex-row items-start gap-3 text-xs border border-border/70 hover:border-gold/30 transition-colors">
+                    <span className="text-muted-foreground min-w-[145px] text-[11px] font-mono shrink-0">
+                      {new Date(log.timestamp).toLocaleString()}
+                    </span>
+                    <div className="flex-1 space-y-1 w-full">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`px-2 py-0.5 rounded border text-[11px] font-semibold ${badgeClass}`}>
+                          {log.action}
+                        </span>
+                        {log.collection && (
+                          <span className="text-[10px] font-mono bg-muted/60 text-muted-foreground px-1.5 py-0.5 rounded border border-border/50 uppercase">
+                            {log.collection}
+                          </span>
+                        )}
+                        {log.adminEmail && (
+                          <span className="text-muted-foreground text-[11px]">
+                            by <span className="text-foreground font-medium">{log.adminEmail}</span>
+                          </span>
+                        )}
+                      </div>
+                      {log.details && (
+                        <p className="text-muted-foreground text-[12px] leading-relaxed pt-0.5 break-words">
+                          {log.details}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>

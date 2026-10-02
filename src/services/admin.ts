@@ -93,11 +93,15 @@ export async function updateApplicationStatus(
   const admin = await requireAdminByToken(idToken);
   const db = await getMongoDb();
 
+  const app = await db.collection('applications').findOne({ _id: new ObjectId(id) });
+  const teamName = app?.['temporaryTeamName'] || 'Unknown Team';
+  const prevStatus = app?.['status'] || 'UNKNOWN';
+
   const logEntry = {
-    action: `Status changed to ${status}`,
+    action: `Status changed to ${status} for "${teamName}" (was ${prevStatus})`,
     timestamp: new Date().toISOString(),
     adminEmail: admin.email,
-    details: adminNotes || '',
+    details: adminNotes ? `Admin notes: ${adminNotes}` : `Team: "${teamName}" status changed from ${prevStatus} to ${status}`,
   };
 
   await db.collection('applications').updateOne(
@@ -119,7 +123,10 @@ export async function updateApplicationStatus(
     action: logEntry.action,
     adminEmail: admin.email,
     timestamp: logEntry.timestamp,
-    details: adminNotes || '',
+    details: logEntry.details,
+    teamName,
+    previousStatus: prevStatus,
+    newStatus: status,
   });
 
   invalidatePublicDataCache();
@@ -167,6 +174,15 @@ export async function allocateParty(idToken: string, applicationId: string, part
     },
   );
 
+  await db.collection('auditLogs').insertOne({
+    collection: 'applications',
+    documentId: applicationId,
+    action: `Allocated party "${party['name']}" to team "${app['temporaryTeamName']}"`,
+    adminEmail: admin.email,
+    timestamp: now,
+    details: `Allocated party "${party['name']}" (${party['abbreviation'] || ''}) to application ID ${applicationId}`,
+  });
+
   invalidatePublicDataCache();
   return { success: true };
 }
@@ -197,7 +213,7 @@ export async function upsertParty(
     formationDate?: string;
   },
 ) {
-  await requireAdminByToken(idToken);
+  const admin = await requireAdminByToken(idToken);
   const db = await getMongoDb();
   const now = new Date().toISOString();
 
@@ -215,6 +231,14 @@ export async function upsertParty(
 
   if (partyData.id) {
     await db.collection('parties').updateOne({ _id: new ObjectId(partyData.id) }, { $set: payload });
+    await db.collection('auditLogs').insertOne({
+      collection: 'parties',
+      documentId: partyData.id,
+      action: `Updated party "${partyData.name}"`,
+      adminEmail: admin.email,
+      timestamp: now,
+      details: `Updated party "${partyData.name}" (${partyData.abbreviation || 'No abbreviation'}) · Alliance: ${partyData.classification || 'INDEPENDENT'}`,
+    });
     invalidatePublicDataCache();
     return { id: partyData.id };
   } else {
@@ -224,15 +248,33 @@ export async function upsertParty(
       assignedTeamName: null,
       createdAt: now,
     });
+    await db.collection('auditLogs').insertOne({
+      collection: 'parties',
+      documentId: result.insertedId.toString(),
+      action: `Created party "${partyData.name}"`,
+      adminEmail: admin.email,
+      timestamp: now,
+      details: `Created new party "${partyData.name}" (${partyData.abbreviation || 'No abbreviation'}) · Alliance: ${partyData.classification || 'INDEPENDENT'}`,
+    });
     invalidatePublicDataCache();
     return { id: result.insertedId.toString() };
   }
 }
 
 export async function deleteParty(idToken: string, id: string) {
-  await requireAdminByToken(idToken);
+  const admin = await requireAdminByToken(idToken);
   const db = await getMongoDb();
+  const party = await db.collection('parties').findOne({ _id: new ObjectId(id) });
+  const partyName = party?.['name'] || id;
   await db.collection('parties').deleteOne({ _id: new ObjectId(id) });
+  await db.collection('auditLogs').insertOne({
+    collection: 'parties',
+    documentId: id,
+    action: `Deleted party "${partyName}"`,
+    adminEmail: admin.email,
+    timestamp: new Date().toISOString(),
+    details: `Deleted party "${partyName}" from Parties Master`,
+  });
   invalidatePublicDataCache();
   return { success: true };
 }
@@ -274,19 +316,45 @@ export async function upsertSponsor(
 
   if (sponsorData.id) {
     await db.collection('sponsors').updateOne({ _id: new ObjectId(sponsorData.id) }, { $set: payload });
+    await db.collection('auditLogs').insertOne({
+      collection: 'sponsors',
+      documentId: sponsorData.id,
+      action: `Updated sponsor "${sponsorData.name}"`,
+      adminEmail: admin.email,
+      timestamp: now,
+      details: `Updated sponsor "${sponsorData.name}" (Category: ${sponsorData.category})`,
+    });
     invalidatePublicDataCache();
     return { id: sponsorData.id };
   } else {
     const result = await db.collection('sponsors').insertOne({ ...payload, createdAt: now });
+    await db.collection('auditLogs').insertOne({
+      collection: 'sponsors',
+      documentId: result.insertedId.toString(),
+      action: `Created sponsor "${sponsorData.name}"`,
+      adminEmail: admin.email,
+      timestamp: now,
+      details: `Added new sponsor "${sponsorData.name}" (Category: ${sponsorData.category})`,
+    });
     invalidatePublicDataCache();
     return { id: result.insertedId.toString() };
   }
 }
 
 export async function deleteSponsor(idToken: string, id: string) {
-  await requireAdminByToken(idToken);
+  const admin = await requireAdminByToken(idToken);
   const db = await getMongoDb();
+  const sponsor = await db.collection('sponsors').findOne({ _id: new ObjectId(id) });
+  const sponsorName = sponsor?.['name'] || id;
   await db.collection('sponsors').deleteOne({ _id: new ObjectId(id) });
+  await db.collection('auditLogs').insertOne({
+    collection: 'sponsors',
+    documentId: id,
+    action: `Deleted sponsor "${sponsorName}"`,
+    adminEmail: admin.email,
+    timestamp: new Date().toISOString(),
+    details: `Removed sponsor "${sponsorName}" from database`,
+  });
   invalidatePublicDataCache();
   return { success: true };
 }
@@ -355,6 +423,14 @@ export async function addAdminUser(idToken: string, email: string, role?: 'ADMIN
       { email: cleanEmail },
       { $set: { status: 'ACTIVE', role: finalRole, updatedAt: new Date().toISOString(), addedBy: superAdmin.email } },
     );
+    await db.collection('auditLogs').insertOne({
+      collection: 'adminUsers',
+      documentId: cleanEmail,
+      action: `Updated admin "${cleanEmail}" (Role: ${finalRole})`,
+      adminEmail: superAdmin.email,
+      timestamp: new Date().toISOString(),
+      details: `Re-activated / updated admin "${cleanEmail}" with role ${finalRole}`,
+    });
     return { success: true, created: false };
   }
 
@@ -366,6 +442,15 @@ export async function addAdminUser(idToken: string, email: string, role?: 'ADMIN
     addedAt: new Date().toISOString(),
     firebaseUid: null,
     lastLoginAt: null,
+  });
+
+  await db.collection('auditLogs').insertOne({
+    collection: 'adminUsers',
+    documentId: cleanEmail,
+    action: `Added new admin "${cleanEmail}" (Role: ${finalRole})`,
+    adminEmail: superAdmin.email,
+    timestamp: new Date().toISOString(),
+    details: `Granted ${finalRole} role to ${cleanEmail}`,
   });
 
   return { success: true, created: true };
@@ -385,11 +470,20 @@ export async function removeAdminUser(idToken: string, email: string) {
     { $set: { status: 'INACTIVE', deactivatedBy: superAdmin.email, deactivatedAt: new Date().toISOString() } },
   );
 
+  await db.collection('auditLogs').insertOne({
+    collection: 'adminUsers',
+    documentId: cleanEmail,
+    action: `Deactivated admin "${cleanEmail}"`,
+    adminEmail: superAdmin.email,
+    timestamp: new Date().toISOString(),
+    details: `Revoked administrative privileges for ${cleanEmail}`,
+  });
+
   return { success: true };
 }
 
-export async function getAuditLogs(idToken: string, limit = 100) {
-  await requireAdminByToken(idToken);
+export async function getAuditLogs(idToken: string, limit = 500) {
+  await requireSuperAdminByToken(idToken);
   const db = await getMongoDb();
   const docs = await db
     .collection('auditLogs')
@@ -447,7 +541,7 @@ export async function upsertOrganiser(
     linkedinUrl?: string;
   },
 ) {
-  await requireAdminByToken(idToken);
+  const admin = await requireAdminByToken(idToken);
   const db = await getMongoDb();
   const now = new Date().toISOString();
   const payload = {
@@ -461,18 +555,44 @@ export async function upsertOrganiser(
   };
   if (data.id) {
     await db.collection('organisers').updateOne({ _id: new ObjectId(data.id) }, { $set: payload });
+    await db.collection('auditLogs').insertOne({
+      collection: 'organisers',
+      documentId: data.id,
+      action: `Updated organiser "${data.name}"`,
+      adminEmail: admin.email,
+      timestamp: now,
+      details: `Updated organiser "${data.name}" (${data.designation})`,
+    });
     invalidatePublicDataCache();
     return { id: data.id };
   }
   const result = await db.collection('organisers').insertOne({ ...payload, createdAt: now });
+  await db.collection('auditLogs').insertOne({
+    collection: 'organisers',
+    documentId: result.insertedId.toString(),
+    action: `Added organiser "${data.name}"`,
+    adminEmail: admin.email,
+    timestamp: now,
+    details: `Added new organiser "${data.name}" (${data.designation})`,
+  });
   invalidatePublicDataCache();
   return { id: result.insertedId.toString() };
 }
 
 export async function deleteOrganiser(idToken: string, id: string) {
-  await requireAdminByToken(idToken);
+  const admin = await requireAdminByToken(idToken);
   const db = await getMongoDb();
+  const organiser = await db.collection('organisers').findOne({ _id: new ObjectId(id) });
+  const name = organiser?.['name'] || id;
   await db.collection('organisers').deleteOne({ _id: new ObjectId(id) });
+  await db.collection('auditLogs').insertOne({
+    collection: 'organisers',
+    documentId: id,
+    action: `Deleted organiser "${name}"`,
+    adminEmail: admin.email,
+    timestamp: new Date().toISOString(),
+    details: `Removed organiser "${name}" from database`,
+  });
   invalidatePublicDataCache();
   return { success: true };
 }
@@ -498,7 +618,7 @@ export async function upsertCoOrganiser(
     linkedinUrl?: string;
   },
 ) {
-  await requireAdminByToken(idToken);
+  const admin = await requireAdminByToken(idToken);
   const db = await getMongoDb();
   const now = new Date().toISOString();
   const payload = {
@@ -512,18 +632,44 @@ export async function upsertCoOrganiser(
   };
   if (data.id) {
     await db.collection('coOrganisers').updateOne({ _id: new ObjectId(data.id) }, { $set: payload });
+    await db.collection('auditLogs').insertOne({
+      collection: 'coOrganisers',
+      documentId: data.id,
+      action: `Updated co-organiser "${data.name}"`,
+      adminEmail: admin.email,
+      timestamp: now,
+      details: `Updated co-organiser "${data.name}" (${data.designation})`,
+    });
     invalidatePublicDataCache();
     return { id: data.id };
   }
   const result = await db.collection('coOrganisers').insertOne({ ...payload, createdAt: now });
+  await db.collection('auditLogs').insertOne({
+    collection: 'coOrganisers',
+    documentId: result.insertedId.toString(),
+    action: `Added co-organiser "${data.name}"`,
+    adminEmail: admin.email,
+    timestamp: now,
+    details: `Added new co-organiser "${data.name}" (${data.designation})`,
+  });
   invalidatePublicDataCache();
   return { id: result.insertedId.toString() };
 }
 
 export async function deleteCoOrganiser(idToken: string, id: string) {
-  await requireAdminByToken(idToken);
+  const admin = await requireAdminByToken(idToken);
   const db = await getMongoDb();
+  const coOrg = await db.collection('coOrganisers').findOne({ _id: new ObjectId(id) });
+  const name = coOrg?.['name'] || id;
   await db.collection('coOrganisers').deleteOne({ _id: new ObjectId(id) });
+  await db.collection('auditLogs').insertOne({
+    collection: 'coOrganisers',
+    documentId: id,
+    action: `Deleted co-organiser "${name}"`,
+    adminEmail: admin.email,
+    timestamp: new Date().toISOString(),
+    details: `Removed co-organiser "${name}" from database`,
+  });
   invalidatePublicDataCache();
   return { success: true };
 }
@@ -545,12 +691,20 @@ export async function upsertDeveloper(
     linkedinUrl?: string;
   },
 ) {
-  await requireAdminByToken(idToken);
+  const admin = await requireAdminByToken(idToken);
   const db = await getMongoDb();
   await db.collection('developers').updateOne(
     { _id: new ObjectId(data.id) },
     { $set: { githubUrl: data.githubUrl || null, linkedinUrl: data.linkedinUrl || null, updatedAt: new Date().toISOString() } },
   );
+  await db.collection('auditLogs').insertOne({
+    collection: 'developers',
+    documentId: data.id,
+    action: `Updated developer profile (ID: ${data.id})`,
+    adminEmail: admin.email,
+    timestamp: new Date().toISOString(),
+    details: `Updated developer links: GitHub: ${data.githubUrl || 'None'}, LinkedIn: ${data.linkedinUrl || 'None'}`,
+  });
   invalidatePublicDataCache();
   return { success: true };
 }
