@@ -1930,7 +1930,7 @@ function AdminPanel() {
                     value={partyForm.classification}
                     onChange={(e) => setPartyForm((f) => ({ ...f, classification: e.target.value }))}
                   >
-                    <option value="INC">INC</option>
+                    <option value="I.N.D.I.A">I.N.D.I.A</option>
                     <option value="NDA">NDA</option>
                     <option value="FEDERAL BLOCK">FEDERAL BLOCK</option>
                     <option value="INDEPENDENT">INDEPENDENT</option>

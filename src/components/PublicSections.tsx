@@ -190,7 +190,13 @@ export function PublicSections() {
 
               if (p?.id) {
                 return (
-                  <Link to="/parties/$partyId" params={{ partyId: p.id }} key={p.id} style={{ display: 'contents' }}>
+                  <Link
+                    to="/parties/$partyId"
+                    params={{ partyId: p.id }}
+                    key={p.id}
+                    style={{ display: 'contents' }}
+                    onClick={() => sessionStorage.setItem('yds-scroll', String(window.scrollY))}
+                  >
                     {card}
                   </Link>
                 );

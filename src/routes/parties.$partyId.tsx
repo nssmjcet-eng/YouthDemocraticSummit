@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Flag, Calendar, Users, Shield, Instagram } from 'lucide-react';
 import { getPartyById } from '@/functions/public';
@@ -29,7 +29,8 @@ export const Route = createFileRoute('/parties/$partyId')({
 });
 
 const CLASSIFICATION_COLOURS: Record<string, string> = {
-  'INC': '#138808',
+  'I.N.D.I.A': '#138808',
+  'INC': '#138808', // legacy fallback
   'NDA': '#FF9933',
   'FEDERAL BLOCK': '#000080',
   'INDEPENDENT': '#6b7280',
@@ -37,6 +38,18 @@ const CLASSIFICATION_COLOURS: Record<string, string> = {
 
 function PartyDetailPage() {
   const { partyId } = Route.useParams();
+  const navigate = useNavigate();
+
+  function handleBackToYds() {
+    const saved = sessionStorage.getItem('yds-scroll');
+    navigate({ to: '/' }).then(() => {
+      if (saved) {
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: parseInt(saved, 10), behavior: 'instant' });
+        });
+      }
+    });
+  }
 
   const partyQuery = useQuery({
     queryKey: ['party', partyId],
@@ -51,10 +64,10 @@ function PartyDetailPage() {
       <div className="party-detail-page">
         <header className="register-page-header">
           <div className="section-inner">
-            <Link to="/" className="back-to-yds-btn">
+            <button onClick={handleBackToYds} className="back-to-yds-btn">
               <ArrowLeft size={16} />
               <span>BACK TO YDS</span>
-            </Link>
+            </button>
             <Link to="/" className="wordmark">
               <img className="brand-logo" src={logo} alt="NSS MJCET Logo" width={38} height={38} />
               <span className="wordmark-title hidden sm:inline-block">YDS 2026<br />BY NSS MJCET</span>
@@ -73,10 +86,10 @@ function PartyDetailPage() {
       <div className="party-detail-page">
         <header className="register-page-header">
           <div className="section-inner">
-            <Link to="/" className="back-to-yds-btn">
+            <button onClick={handleBackToYds} className="back-to-yds-btn">
               <ArrowLeft size={16} />
               <span>BACK TO YDS</span>
-            </Link>
+            </button>
           </div>
         </header>
         <main className="section-inner" style={{ padding: '80px 0', textAlign: 'center' }}>
@@ -94,10 +107,10 @@ function PartyDetailPage() {
       {/* Header */}
       <header className="register-page-header">
         <div className="section-inner">
-          <Link to="/" className="back-to-yds-btn" aria-label="Return to YDS Homepage">
+          <button onClick={handleBackToYds} className="back-to-yds-btn" aria-label="Return to YDS Homepage">
             <ArrowLeft size={16} />
             <span>BACK TO YDS</span>
-          </Link>
+          </button>
           <Link to="/" className="wordmark">
             <img className="brand-logo" src={logo} alt="NSS MJCET Logo" width={38} height={38} />
             <span className="wordmark-title hidden sm:inline-block">YDS 2026<br />BY NSS MJCET</span>
@@ -172,7 +185,9 @@ function PartyDetailPage() {
               {party.historyDescription && (
                 <div className="party-detail-card">
                   <span className="eyebrow">ABOUT THE PARTY</span>
-                  <p className="party-detail-text">{party.historyDescription}</p>
+                  <p className="party-detail-text">
+                    {party.historyDescription.replace(/\r?\n/g, ' ').replace(/\s{2,}/g, ' ').trim()}
+                  </p>
                 </div>
               )}
 
@@ -189,12 +204,17 @@ function PartyDetailPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="party-detail-empty">
-                    <Shield size={22} strokeWidth={1.5} className="text-gold" />
-                    <p>
+                  <div className="party-detail-pending">
+                    <div className="party-detail-pending-icon">
+                      <Shield size={28} strokeWidth={1.2} />
+                    </div>
+                    <p className="party-detail-pending-title">
+                      {party.resultsReleased ? 'No Team Assigned' : 'Pending Allocation'}
+                    </p>
+                    <p className="party-detail-pending-sub">
                       {party.resultsReleased
                         ? 'No team has been assigned to this party yet.'
-                        : 'Team assignment will be revealed when results are released.'}
+                        : 'Team allocation will be revealed when results are officially released.'}
                     </p>
                   </div>
                 )}
@@ -207,10 +227,14 @@ function PartyDetailPage() {
       {/* Footer */}
       <footer className="site-footer">
         <div className="section-inner">
-          <Link className="footer-title footer-brand" to="/">
+          <button
+            onClick={handleBackToYds}
+            className="footer-title footer-brand"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 12 }}
+          >
             <img className="brand-logo" src={logo} alt="NSS MJCET logo" width={40} height={40} />
             YOUTH DEMOCRATIC SUMMIT 2026 · NSS MJCET
-          </Link>
+          </button>
           <div className="footer-right">
             <a
               href={YDS_CONFIG.instagramUrl}
@@ -222,7 +246,12 @@ function PartyDetailPage() {
             >
               <Instagram size={21} />
             </a>
-            <Link to="/" className="text-xs text-gold hover:underline">← RETURN TO HOMEPAGE</Link>
+            <button
+              onClick={handleBackToYds}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--gold)', fontSize: '0.75rem', letterSpacing: '0.05em' }}
+            >
+              ← RETURN TO HOMEPAGE
+            </button>
           </div>
           <span>ENTER THE PARLIAMENT. FIND YOUR VOICE.</span>
         </div>
