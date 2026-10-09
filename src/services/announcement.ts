@@ -95,16 +95,46 @@ Youth Democratic Summit 2026 | NSS MJCET`,
 
 async function getAnnouncementDoc(): Promise<AnnouncementRecord> {
   const db = await getMongoDb();
-  const doc = await db.collection('settings').findOne({ key: ANNOUNCEMENT_KEY });
+  let doc = await db.collection('settings').findOne({ key: ANNOUNCEMENT_KEY });
   if (!doc) {
     // Seed the default postponement announcement on first access
     await db.collection('settings').insertOne({
       key: ANNOUNCEMENT_KEY,
       ...DEFAULT_ANNOUNCEMENT,
     });
-    return DEFAULT_ANNOUNCEMENT;
+    doc = await db.collection('settings').findOne({ key: ANNOUNCEMENT_KEY });
   }
-  return doc as unknown as AnnouncementRecord;
+
+  const d = doc || {};
+  const draftObj = (d['draft'] as any) || {};
+  const pubObj = (d['published'] as any) || null;
+
+  return {
+    eventStatus: (d['eventStatus'] as any) || DEFAULT_ANNOUNCEMENT.eventStatus,
+    freshRegistrationStatus: (d['freshRegistrationStatus'] as any) || DEFAULT_ANNOUNCEMENT.freshRegistrationStatus,
+    registrationDeadlineOverride: (d['registrationDeadlineOverride'] as any) ?? null,
+    revisedDates: (d['revisedDates'] as any) ?? null,
+    revisedVenue: (d['revisedVenue'] as any) ?? null,
+    draft: {
+      title: draftObj['title'] ?? DEFAULT_ANNOUNCEMENT.draft.title,
+      bannerMessage: draftObj['bannerMessage'] ?? DEFAULT_ANNOUNCEMENT.draft.bannerMessage,
+      fullBody: draftObj['fullBody'] ?? DEFAULT_ANNOUNCEMENT.draft.fullBody,
+      reason: draftObj['reason'] ?? DEFAULT_ANNOUNCEMENT.draft.reason,
+    },
+    published: pubObj
+      ? {
+          title: pubObj['title'] ?? DEFAULT_ANNOUNCEMENT.draft.title,
+          bannerMessage: pubObj['bannerMessage'] ?? DEFAULT_ANNOUNCEMENT.draft.bannerMessage,
+          fullBody: pubObj['fullBody'] ?? DEFAULT_ANNOUNCEMENT.draft.fullBody,
+          reason: pubObj['reason'] ?? DEFAULT_ANNOUNCEMENT.draft.reason,
+          publishedAt: (pubObj['publishedAt'] as string) || null,
+          publishedBy: (pubObj['publishedBy'] as string) || null,
+        }
+      : null,
+    isVisible: d['isVisible'] !== false,
+    updatedBy: (d['updatedBy'] as string) || null,
+    updatedAt: (d['updatedAt'] as string) || null,
+  };
 }
 
 // ── Public read (no auth required) ───────────────────────────────────────────

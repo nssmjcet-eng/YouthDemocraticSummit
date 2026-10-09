@@ -2316,7 +2316,12 @@ function AdminPanel() {
           )}
 
           {announcementQuery.isError && (
-            <div className="yds-card p-6 text-center text-destructive">Failed to load announcement settings. Please refresh.</div>
+            <div className="yds-card p-6 text-center text-destructive space-y-3">
+              <p className="font-semibold">Failed to load announcement settings: {((announcementQuery.error as any)?.message || 'Unknown error')}</p>
+              <Button variant="outline" size="sm" onClick={() => announcementQuery.refetch()}>
+                Retry
+              </Button>
+            </div>
           )}
 
           {announcementQuery.data && (
