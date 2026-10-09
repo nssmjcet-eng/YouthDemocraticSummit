@@ -80,6 +80,7 @@ import {
   adminPublishAnnouncement,
   adminHideAnnouncement,
   adminShowAnnouncement,
+  adminQuickToggleRegistration,
 } from '@/functions/announcement';
 import type { TeamApplicationPayload } from '@/types/yds';
 
@@ -263,6 +264,34 @@ function AdminPanel() {
   useEffect(() => {
     if (activeTab !== 'announcement') setAnnouncementFormLoaded(false);
   }, [activeTab]);
+
+  const [isTogglingReg, setIsTogglingReg] = useState(false);
+
+  const handleQuickToggleRegistration = async (allow: boolean) => {
+    const actionLabel = allow
+      ? 'OPEN registrations for public team applications'
+      : 'STOP taking registrations and display the official notice when users click Register';
+    if (!confirm(`Are you sure you want to ${actionLabel}?`)) return;
+
+    setIsTogglingReg(true);
+    setAnnouncementMsg('');
+    try {
+      const tok = idTokenFromCtx || await getIdToken() || '';
+      await adminQuickToggleRegistration({ data: { idToken: tok, allow } });
+      await queryClient.invalidateQueries({ queryKey: ['admin-announcement'] });
+      await queryClient.invalidateQueries({ queryKey: ['public-announcement'] });
+      setAnnouncementMsg(
+        allow
+          ? '✅ Registrations are now OPEN on the website.'
+          : '🛑 Registrations have been STOPPED. When visitors click Register Now, the official notice will open.'
+      );
+      setAnnouncementFormLoaded(false);
+    } catch (err: any) {
+      setAnnouncementMsg(`❌ Error: ${err?.message || err}`);
+    } finally {
+      setIsTogglingReg(false);
+    }
+  };
 
 
   // ── Applications (Server-side paginated & filtered) ──────────────────────
@@ -2326,6 +2355,47 @@ function AdminPanel() {
 
           {announcementQuery.data && (
             <>
+              {/* Master Registration Intake Control Card */}
+              <div className="yds-card p-6 border-gold/60 bg-card space-y-4 shadow-sm">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                        <Shield size={18} className="text-gold" />
+                        Website Registration Intake
+                      </h3>
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold border ${announcementQuery.data.freshRegistrationStatus === 'OPEN' ? 'bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/40' : 'bg-destructive/15 text-destructive border-destructive/40'}`}>
+                        {announcementQuery.data.freshRegistrationStatus === 'OPEN' ? '● REGISTRATIONS ACCEPTED (OPEN)' : '■ REGISTRATIONS STOPPED (CLOSED)'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground max-w-2xl">
+                      Control whether the public website accepts registrations. When stopped, any visitor clicking &quot;Register Now&quot; or &quot;Register Team&quot; on the website immediately opens the official notice configured below.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <Button
+                      variant={announcementQuery.data.freshRegistrationStatus === 'OPEN' ? 'default' : 'outline'}
+                      size="sm"
+                      disabled={isTogglingReg}
+                      className={announcementQuery.data.freshRegistrationStatus === 'OPEN' ? 'bg-green-600 hover:bg-green-700 text-white font-bold' : 'border-green-600/40 text-green-700 hover:bg-green-500/10'}
+                      onClick={() => handleQuickToggleRegistration(true)}
+                    >
+                      🟢 Allow Registrations (Open)
+                    </Button>
+                    <Button
+                      variant={announcementQuery.data.freshRegistrationStatus !== 'OPEN' ? 'default' : 'outline'}
+                      size="sm"
+                      disabled={isTogglingReg}
+                      className={announcementQuery.data.freshRegistrationStatus !== 'OPEN' ? 'bg-destructive hover:bg-destructive/90 text-white font-bold' : 'border-destructive/40 text-destructive hover:bg-destructive/10'}
+                      onClick={() => handleQuickToggleRegistration(false)}
+                    >
+                      🛑 Stop Taking Registrations (Close &amp; Show Notice)
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
               {/* Current published status */}
               <div className="yds-card p-5 space-y-3">
                 <div className="flex items-center justify-between flex-wrap gap-3">

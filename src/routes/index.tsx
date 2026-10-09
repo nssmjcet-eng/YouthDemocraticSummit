@@ -13,7 +13,7 @@ import { PublicSections, CommunitySections, DevelopersSection } from '@/componen
 import { YDS_CONFIG } from '@/config/yds';
 import { NssSection } from '@/components/NssSection';
 import { ParliamentaryJourney } from '@/components/ParliamentaryJourney';
-import { PostponementBanner, AnnouncementLoadError } from '@/components/PostponementBanner';
+import { PostponementBanner, AnnouncementLoadError, RegistrationNoticeModal } from '@/components/PostponementBanner';
 import { useQuery } from '@tanstack/react-query';
 import { getPublicAnnouncement } from '@/functions/announcement';
 
@@ -281,17 +281,8 @@ const parliamentaryProceedings = [
 ];
 
 function Home() {
-  const [menuOpen,setMenuOpen] = useState(false);
-  const links: [string, string][] = [
-    ['NSS MJCET', '#nss'],
-    ['Details', '#schedule'],
-    ['YDS Structure', '/structure'],
-    ['Parties', '#parties'],
-    ['Results', '#results'],
-    ['Sponsors', '#sponsors'],
-    ['Organisers', '#organisers'],
-    ['Register', '/register'],
-  ];
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showNoticeModal, setShowNoticeModal] = useState(false);
 
   // Fetch the persistent announcement from the backend
   const announcementQuery = useQuery({
@@ -303,14 +294,41 @@ function Home() {
 
   const announcementData = announcementQuery.data;
   const announcementError = announcementQuery.isError;
+  const isRegOpen = announcementData?.freshRegistrationStatus === 'OPEN';
+
+  const links: [string, string][] = [
+    ['NSS MJCET', '#nss'],
+    ['Details', '#schedule'],
+    ['YDS Structure', '/structure'],
+    ['Parties', '#parties'],
+    ['Results', '#results'],
+    ['Sponsors', '#sponsors'],
+    ['Organisers', '#organisers'],
+    ['Register', isRegOpen ? '/register' : '#notice'],
+  ];
 
   return <>
     <main id="top"><Journey/>
       <header className="site-header">
         <a className="wordmark" href="#top" aria-label="Youth Democratic Summit, back to top"><img className="brand-logo" src={logo} alt="YDS NSS MJCET logo" width={44} height={44}/><span className="wordmark-title">YDS<br/>BY NSS MJCET</span></a>
         <nav className={menuOpen ? 'main-nav open' : 'main-nav'} aria-label="Main navigation" itemScope itemType="https://schema.org/SiteNavigationElement">
-          {links.map(([label, href]) => (
-            href.startsWith('/') ? (
+          {links.map(([label, href]) => {
+            if (label === 'Register' && !isRegOpen) {
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  className="text-xs text-[var(--ivory)] opacity-75 hover:opacity-100 bg-transparent border-0 cursor-pointer p-0"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setShowNoticeModal(true);
+                  }}
+                >
+                  <span>{label}</span>
+                </button>
+              );
+            }
+            return href.startsWith('/') ? (
               <Link to={href} key={label} onClick={() => setMenuOpen(false)}>
                 <span>{label}</span>
               </Link>
@@ -318,10 +336,22 @@ function Home() {
               <a href={href} key={label} itemProp="url" onClick={() => setMenuOpen(false)}>
                 <span itemProp="name">{label}</span>
               </a>
-            )
-          ))}
+            );
+          })}
         </nav>
-        <Button asChild variant="outline" className="header-cta"><Link to="/register">REGISTER TEAM <ArrowRight size={15}/></Link></Button>
+        {isRegOpen ? (
+          <Button asChild variant="outline" className="header-cta">
+            <Link to="/register">REGISTER TEAM <ArrowRight size={15}/></Link>
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            className="header-cta"
+            onClick={() => setShowNoticeModal(true)}
+          >
+            REGISTER NOW <ArrowRight size={15}/>
+          </Button>
+        )}
         <Button className="mobile-toggle" variant="ghost" size="icon" type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={25}/> : <Menu size={25}/>}</Button>
       </header>
 
@@ -459,11 +489,21 @@ function Home() {
                 </div>
               </div>
               <div className="pt-2">
-                <Button asChild size="lg" className="register-main-btn">
-                  <Link to="/register">
-                    REGISTER YOUR TEAM <ArrowRight size={18} />
-                  </Link>
-                </Button>
+                {isRegOpen ? (
+                  <Button asChild size="lg" className="register-main-btn">
+                    <Link to="/register">
+                      REGISTER YOUR TEAM <ArrowRight size={18} />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    className="register-main-btn"
+                    onClick={() => setShowNoticeModal(true)}
+                  >
+                    REGISTER NOW <ArrowRight size={18} />
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -471,6 +511,14 @@ function Home() {
       </section>
       <DevelopersSection/>
     </main>
+
+    {/* Official Announcement / Notice Modal — opens when clicking Register while paused */}
+    <RegistrationNoticeModal
+      open={showNoticeModal}
+      onOpenChange={setShowNoticeModal}
+      data={announcementData}
+    />
+
     <footer className="site-footer">
       <div className="section-inner footer-grid">
         <div className="footer-col brand-col">
@@ -514,7 +562,19 @@ function Home() {
         <nav className="footer-col" aria-label="Participation and Leadership" itemScope itemType="https://schema.org/SiteNavigationElement">
           <h4 className="footer-heading">PARTICIPATION</h4>
           <ul className="footer-links">
-            <li><Link to="/register" itemProp="url"><span itemProp="name">Register Your Team</span></Link></li>
+            <li>
+              {isRegOpen ? (
+                <Link to="/register" itemProp="url"><span itemProp="name">Register Your Team</span></Link>
+              ) : (
+                <button
+                  type="button"
+                  className="bg-transparent border-0 p-0 text-inherit font-inherit cursor-pointer hover:underline text-left text-xs"
+                  onClick={() => setShowNoticeModal(true)}
+                >
+                  <span itemProp="name">Register Your Team (Notice)</span>
+                </button>
+              )}
+            </li>
             <li><a href="#organisers" itemProp="url"><span itemProp="name">Organising Committee</span></a></li>
             <li><a href="#sponsors" itemProp="url"><span itemProp="name">Summit Sponsors</span></a></li>
             <li><a href="#developers" itemProp="url"><span itemProp="name">Developers</span></a></li>

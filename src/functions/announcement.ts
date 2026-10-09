@@ -67,3 +67,10 @@ export const adminShowAnnouncement = createServerFn({ method: 'POST' })
     const { showAnnouncement } = await import('@/services/announcement');
     return showAnnouncement(data.idToken);
   });
+
+export const adminQuickToggleRegistration = createServerFn({ method: 'POST' })
+  .validator((data: { idToken: string; allow: boolean }) => data)
+  .handler(async ({ data }) => {
+    const { quickToggleRegistration } = await import('@/services/announcement');
+    return quickToggleRegistration(data.idToken, data.allow);
+  });

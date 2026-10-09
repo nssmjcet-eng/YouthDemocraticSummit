@@ -134,7 +134,12 @@ function RegisterPage() {
             ) : isRegistrationOpen ? (
               <RegistrationForm />
             ) : (
-              <RegistrationClosedNotice freshStatus={freshStatus} />
+              <RegistrationClosedNotice
+                freshStatus={freshStatus}
+                announcement={announcementQuery.data?.announcement}
+                revisedDates={announcementQuery.data?.revisedDates}
+                revisedVenue={announcementQuery.data?.revisedVenue}
+              />
             )}
           </div>
         </div>

@@ -368,3 +368,45 @@ export async function enforceRegistrationOpen() {
     }
   }
 }
+
+/**
+ * Direct toggle to immediately allow or stop accepting registrations from the admin panel.
+ * Updates database, writes audit log, and invalidates public cache.
+ */
+export async function quickToggleRegistration(idToken: string, allow: boolean) {
+  const admin = await requireAdminByToken(idToken);
+  const db = await getMongoDb();
+  const now = new Date().toISOString();
+
+  const newFreshStatus: FreshRegistrationStatus = allow ? 'OPEN' : 'CLOSED';
+  const newEventStatus: EventStatus = allow ? 'REGISTRATION_OPEN' : 'POSTPONED';
+
+  await db.collection('settings').updateOne(
+    { key: ANNOUNCEMENT_KEY },
+    {
+      $set: {
+        freshRegistrationStatus: newFreshStatus,
+        eventStatus: newEventStatus,
+        isVisible: true,
+        updatedBy: admin.email,
+        updatedAt: now,
+      },
+    },
+    { upsert: true },
+  );
+
+  await db.collection('auditLogs').insertOne({
+    collection: 'settings',
+    documentId: ANNOUNCEMENT_KEY,
+    action: allow ? 'REGISTRATION_OPENED' : 'REGISTRATION_STOPPED',
+    adminEmail: admin.email,
+    timestamp: now,
+    details: allow
+      ? 'Registrations opened by administrator.'
+      : 'Registrations stopped by administrator. Public Register buttons now open the official notice.',
+  });
+
+  invalidatePublicDataCache();
+  return { success: true, freshRegistrationStatus: newFreshStatus, eventStatus: newEventStatus };
+}
+

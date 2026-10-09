@@ -141,17 +141,149 @@ export function AnnouncementLoadError() {
   );
 }
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Calendar, MapPin } from 'lucide-react';
+
+/**
+ * Registration Notice Modal — triggered when a visitor clicks "Register Now" or "Register Team"
+ * while registrations are stopped / closed from the admin panel.
+ */
+export function RegistrationNoticeModal({
+  open,
+  onOpenChange,
+  data,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  data?: PublicAnnouncementData | null;
+}) {
+  const announcement = data?.announcement;
+  const title = announcement?.title || 'YDS 2026 Has Been Postponed';
+  const bannerMessage =
+    announcement?.bannerMessage ||
+    'The Youth Democratic Summit 2026 has been postponed due to venue-related issues. Fresh registrations will be invited once revised details are confirmed.';
+  const fullBody = announcement?.fullBody || '';
+  const revisedDates = data?.revisedDates;
+  const revisedVenue = data?.revisedVenue;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-card border-gold/40 text-foreground p-6 sm:p-8">
+        <DialogHeader className="text-left space-y-2 border-b border-border/60 pb-4">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 uppercase tracking-wider">
+              <AlertTriangle size={12} />
+              Registration Paused
+            </span>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-gold">OFFICIAL NOTICE</span>
+          </div>
+          <DialogTitle className="font-serif text-2xl sm:text-3xl text-foreground font-normal leading-tight">
+            {title}
+          </DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground">
+            Youth Democratic Summit 2026 · Organised by NSS MJCET
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2 text-sm leading-relaxed text-muted-foreground">
+          {bannerMessage && (
+            <div className="p-3.5 rounded bg-muted/60 border border-border text-foreground font-medium text-sm">
+              {bannerMessage}
+            </div>
+          )}
+
+          {fullBody ? (
+            <div className="space-y-3 font-normal text-foreground/90 leading-relaxed text-[13.5px]">
+              {fullBody.split('\n').map((line, idx) =>
+                line.trim() === '' ? <div key={idx} className="h-2" /> : <p key={idx}>{line}</p>
+              )}
+            </div>
+          ) : (
+            <p>Fresh registrations will open once revised event details are confirmed. Please check the official website for updates.</p>
+          )}
+
+          {(revisedDates || revisedVenue) && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded bg-muted/40 border border-gold/30">
+              {revisedDates && (
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold tracking-wider text-gold uppercase flex items-center gap-1">
+                    <Calendar size={12} /> Revised Dates
+                  </span>
+                  <p className="text-sm font-semibold text-foreground">{revisedDates}</p>
+                </div>
+              )}
+              {revisedVenue && (
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold tracking-wider text-gold uppercase flex items-center gap-1">
+                    <MapPin size={12} /> Revised Venue
+                  </span>
+                  <p className="text-sm font-semibold text-foreground">{revisedVenue}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="border-t border-border/60 pt-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <p className="text-xs text-muted-foreground text-center sm:text-left">
+            Thank you for your patience and understanding.
+          </p>
+          <Button onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
+            Close Notice
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /**
  * Registration closed notice — shown on the /register page when registration is not open.
  */
-export function RegistrationClosedNotice({ freshStatus }: { freshStatus: string }) {
+export function RegistrationClosedNotice({
+  freshStatus,
+  announcement,
+  revisedDates,
+  revisedVenue,
+}: {
+  freshStatus: string;
+  announcement?: PublicAnnouncementData['announcement'] | null;
+  revisedDates?: string | null;
+  revisedVenue?: string | null;
+}) {
   return (
-    <div className="registration-closed-notice" role="status" aria-live="polite">
+    <div className="registration-closed-notice space-y-4" role="status" aria-live="polite">
       <div className="registration-closed-icon">
         <AlertTriangle size={32} className="text-gold" aria-hidden="true" />
       </div>
-      <h2 className="registration-closed-title">Registrations Are Currently Closed</h2>
-      {freshStatus === 'NOT_OPEN' ? (
+
+      <div className="text-center space-y-1">
+        <span className="text-xs font-bold tracking-wider uppercase text-gold">OFFICIAL NOTICE</span>
+        <h2 className="registration-closed-title">
+          {announcement?.title || 'Registrations Are Currently Paused'}
+        </h2>
+      </div>
+
+      {announcement?.bannerMessage && (
+        <div className="p-3.5 rounded bg-muted/60 border border-border text-foreground font-medium text-sm max-w-xl text-left">
+          {announcement.bannerMessage}
+        </div>
+      )}
+
+      {announcement?.fullBody ? (
+        <div className="text-left text-sm text-muted-foreground space-y-2.5 max-w-xl leading-relaxed">
+          {announcement.fullBody.split('\n').map((line, i) =>
+            line.trim() === '' ? <div key={i} className="h-1.5" /> : <p key={i}>{line}</p>
+          )}
+        </div>
+      ) : freshStatus === 'NOT_OPEN' ? (
         <p className="registration-closed-message">
           Fresh registrations will open once the revised event details are confirmed. Please check the official website for updates.
         </p>
@@ -160,9 +292,32 @@ export function RegistrationClosedNotice({ freshStatus }: { freshStatus: string 
           The registration period is currently closed. Please check the official website for future announcements.
         </p>
       )}
-      <p className="registration-closed-sub">
-        YDS 2026 has been postponed. All updates will be published on this website.
+
+      {(revisedDates || revisedVenue) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded bg-muted/40 border border-gold/30 max-w-xl w-full text-left">
+          {revisedDates && (
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold tracking-wider text-gold uppercase flex items-center gap-1">
+                <Calendar size={12} /> Revised Dates
+              </span>
+              <p className="text-sm font-semibold text-foreground">{revisedDates}</p>
+            </div>
+          )}
+          {revisedVenue && (
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold tracking-wider text-gold uppercase flex items-center gap-1">
+                <MapPin size={12} /> Revised Venue
+              </span>
+              <p className="text-sm font-semibold text-foreground">{revisedVenue}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      <p className="registration-closed-sub text-xs text-muted-foreground/80">
+        YDS 2026 has been postponed. All updates are published on this official website.
       </p>
     </div>
   );
 }
+

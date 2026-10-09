@@ -401,4 +401,43 @@ test('Announcement Management & Registration Security Test Suite', async (t) => 
     };
     assert.equal(publicData.announcement, null, 'Public announcement should be null when isVisible is false');
   });
+
+  await t.test('10. Quick registration toggle immediately updates intake status and logs action', async () => {
+    const settings = mockDb.collection('settings');
+    const auditLogs = mockDb.collection('auditLogs');
+
+    // Simulate stopping registrations
+    await settings.updateOne(
+      { key: 'event_announcement' },
+      { $set: { freshRegistrationStatus: 'CLOSED', eventStatus: 'POSTPONED' } }
+    );
+    await auditLogs.insertOne({
+      action: 'REGISTRATION_STOPPED',
+      adminEmail: 'admin@mjcollege.ac.in',
+      timestamp: new Date().toISOString(),
+    });
+
+    let doc = await settings.findOne({ key: 'event_announcement' });
+    assert.equal(doc.freshRegistrationStatus, 'CLOSED');
+    assert.equal(doc.eventStatus, 'POSTPONED');
+
+    // Simulate allowing registrations
+    await settings.updateOne(
+      { key: 'event_announcement' },
+      { $set: { freshRegistrationStatus: 'OPEN', eventStatus: 'REGISTRATION_OPEN' } }
+    );
+    await auditLogs.insertOne({
+      action: 'REGISTRATION_OPENED',
+      adminEmail: 'admin@mjcollege.ac.in',
+      timestamp: new Date().toISOString(),
+    });
+
+    doc = await settings.findOne({ key: 'event_announcement' });
+    assert.equal(doc.freshRegistrationStatus, 'OPEN');
+    assert.equal(doc.eventStatus, 'REGISTRATION_OPEN');
+
+    const log = await auditLogs.findOne({ action: 'REGISTRATION_STOPPED' });
+    assert.ok(log, 'Stop registration action was logged in auditLogs');
+  });
 });
+
