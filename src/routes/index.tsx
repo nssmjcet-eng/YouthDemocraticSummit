@@ -13,6 +13,9 @@ import { PublicSections, CommunitySections, DevelopersSection } from '@/componen
 import { YDS_CONFIG } from '@/config/yds';
 import { NssSection } from '@/components/NssSection';
 import { ParliamentaryJourney } from '@/components/ParliamentaryJourney';
+import { PostponementBanner, AnnouncementLoadError } from '@/components/PostponementBanner';
+import { useQuery } from '@tanstack/react-query';
+import { getPublicAnnouncement } from '@/functions/announcement';
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -279,7 +282,7 @@ const parliamentaryProceedings = [
 
 function Home() {
   const [menuOpen,setMenuOpen] = useState(false);
-  const links = [
+  const links: [string, string][] = [
     ['NSS MJCET', '#nss'],
     ['Details', '#schedule'],
     ['YDS Structure', '/structure'],
@@ -289,6 +292,18 @@ function Home() {
     ['Organisers', '#organisers'],
     ['Register', '/register'],
   ];
+
+  // Fetch the persistent announcement from the backend
+  const announcementQuery = useQuery({
+    queryKey: ['public-announcement'],
+    queryFn: () => getPublicAnnouncement(),
+    staleTime: 60_000,
+    retry: 2,
+  });
+
+  const announcementData = announcementQuery.data;
+  const announcementError = announcementQuery.isError;
+
   return <>
     <main id="top"><Journey/>
       <header className="site-header">
@@ -310,7 +325,12 @@ function Home() {
         <Button className="mobile-toggle" variant="ghost" size="icon" type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={25}/> : <Menu size={25}/>}</Button>
       </header>
 
-      {/* 1. NSS MJCET: First informational section immediately after Hero/Navbar */}
+      {/* Postponement announcement banner — directly below navigation */}
+      {announcementError && <AnnouncementLoadError />}
+      {!announcementError && announcementData && (
+        <PostponementBanner data={announcementData} />
+      )}
+
       <NssSection />
 
       {/* 2. KEY SUMMIT DETAILS */}

@@ -299,7 +299,7 @@ export async function upsertSponsor(
     isActive?: boolean;
   },
 ) {
-  await requireAdminByToken(idToken);
+  const admin = await requireAdminByToken(idToken);
   const db = await getMongoDb();
   const now = new Date().toISOString();
 

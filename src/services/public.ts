@@ -2,6 +2,7 @@ import { getMongoDb } from './mongo-client';
 import { uploadImageToGridFS } from './gridfs';
 import { requireAdminByToken } from './auth';
 import { YDS_CONFIG } from '@/config/yds';
+import { getPublicAnnouncement, enforceRegistrationOpen } from './announcement';
 
 let publicDataCache: {
   data: any;
@@ -20,7 +21,7 @@ export async function fetchPublicData(bypassCache = false) {
 
   const db = await getMongoDb();
 
-  const [settingsDoc, acceptedApps, parties, sponsors, organisers, coOrganisers, developers] = await Promise.all([
+  const [settingsDoc, acceptedApps, parties, sponsors, organisers, coOrganisers, developers, announcementData] = await Promise.all([
     db.collection('settings').findOne({ key: 'results' }),
     db.collection('applications').find({ status: 'ACCEPTED' }).sort({ temporaryTeamName: 1 }).toArray(),
     db.collection('parties').find({}).sort({ sortOrder: 1 }).toArray(),
@@ -28,6 +29,7 @@ export async function fetchPublicData(bypassCache = false) {
     db.collection('organisers').find({ isActive: true }).sort({ displayOrder: 1 }).toArray(),
     db.collection('coOrganisers').find({ isActive: true }).sort({ displayOrder: 1 }).toArray(),
     db.collection('developers').find({}).sort({ displayOrder: 1 }).toArray(),
+    getPublicAnnouncement(),
   ]);
 
   const resultsReleased = settingsDoc?.['released'] === true;
@@ -45,6 +47,7 @@ export async function fetchPublicData(bypassCache = false) {
   const publicData = {
     resultsReleased,
     results,
+    announcement: announcementData,
     parties: parties.map((p) => ({
       id: p._id.toString(),
       name: p['name'] as string,
@@ -173,6 +176,11 @@ export async function submitRegistration(data: {
     teamLeaderConfirmation: boolean;
   };
 }) {
+  // ── Server-side registration gate (dynamic, admin-controlled) ────────────
+  await enforceRegistrationOpen();
+
+  // Legacy deadline guard (kept for backward compatibility; will not fire if
+  // enforceRegistrationOpen already rejected the request above)
   if (new Date() > new Date(YDS_CONFIG.registrationDeadlineDate)) {
     throw new Error('DEADLINE_PASSED: The registration deadline for YDS 2026 has passed (11th October 2026). Submissions are now closed.');
   }

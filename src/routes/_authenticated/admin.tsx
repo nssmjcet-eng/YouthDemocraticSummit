@@ -74,6 +74,13 @@ import {
   adminExportCompendium,
   adminClearApplications,
 } from '@/functions/admin';
+import {
+  adminGetAnnouncement,
+  adminSaveDraftAnnouncement,
+  adminPublishAnnouncement,
+  adminHideAnnouncement,
+  adminShowAnnouncement,
+} from '@/functions/announcement';
 import type { TeamApplicationPayload } from '@/types/yds';
 
 export const Route = createFileRoute('/_authenticated/admin')({
@@ -99,7 +106,8 @@ type AdminNavTab =
   | 'developers'
   | 'storage'
   | 'admins'
-  | 'audit';
+  | 'audit'
+  | 'announcement';
 
 type AppFilterStatus = 'ALL' | 'PENDING' | 'ACCEPTED' | 'WAITLISTED' | 'DECLINED';
 
@@ -190,6 +198,24 @@ function AdminPanel() {
   const [isExportingCompendium, setIsExportingCompendium] = useState(false);
   const [isClearingApps, setIsClearingApps] = useState(false);
 
+  // ── Announcement state ────────────────────────────────────────────────────
+  const [announcementForm, setAnnouncementForm] = useState({
+    title: '',
+    bannerMessage: '',
+    fullBody: '',
+    reason: '',
+    eventStatus: 'POSTPONED' as 'SCHEDULED' | 'POSTPONED' | 'REGISTRATION_OPEN' | 'REGISTRATION_CLOSED' | 'CANCELLED' | 'COMPLETED',
+    freshRegistrationStatus: 'NOT_OPEN' as 'NOT_OPEN' | 'OPEN' | 'CLOSED',
+    registrationDeadlineOverride: '',
+    revisedDates: '',
+    revisedVenue: '',
+  });
+  const [announcementSaving, setAnnouncementSaving] = useState(false);
+  const [announcementPublishing, setAnnouncementPublishing] = useState(false);
+  const [announcementMsg, setAnnouncementMsg] = useState('');
+  const [showAnnouncementPreview, setShowAnnouncementPreview] = useState(false);
+  const [announcementFormLoaded, setAnnouncementFormLoaded] = useState(false);
+
   const adminUserEmail: string = (routeCtx as any)?.user?.email ?? firebaseAuth.currentUser?.email ?? '';
   const isSuperAdmin: boolean = (routeCtx as any)?.isSuperAdmin ?? false;
   const idTokenFromCtx: string = (routeCtx as any)?.idToken ?? '';
@@ -203,6 +229,41 @@ function AdminPanel() {
     },
     refetchInterval: 30_000,
   });
+
+  // ── Announcement query ────────────────────────────────────────────────────
+  const announcementQuery = useQuery({
+    queryKey: ['admin-announcement'],
+    enabled: activeTab === 'announcement',
+    queryFn: async () => {
+      const tok = idTokenFromCtx || await getIdToken() || '';
+      return adminGetAnnouncement({ data: { idToken: tok } });
+    },
+  });
+
+  // Populate form when announcement data arrives
+  useEffect(() => {
+    if (announcementQuery.data && !announcementFormLoaded) {
+      const d = announcementQuery.data;
+      setAnnouncementForm({
+        title: d.draft?.title ?? '',
+        bannerMessage: d.draft?.bannerMessage ?? '',
+        fullBody: d.draft?.fullBody ?? '',
+        reason: d.draft?.reason ?? '',
+        eventStatus: (d.eventStatus as any) ?? 'POSTPONED',
+        freshRegistrationStatus: (d.freshRegistrationStatus as any) ?? 'NOT_OPEN',
+        registrationDeadlineOverride: d.registrationDeadlineOverride ?? '',
+        revisedDates: d.revisedDates ?? '',
+        revisedVenue: d.revisedVenue ?? '',
+      });
+      setAnnouncementFormLoaded(true);
+    }
+  }, [announcementQuery.data, announcementFormLoaded]);
+
+  // Reset loaded flag when tab changes away and back
+  useEffect(() => {
+    if (activeTab !== 'announcement') setAnnouncementFormLoaded(false);
+  }, [activeTab]);
+
 
   // ── Applications (Server-side paginated & filtered) ──────────────────────
   const registrationsQuery = useQuery({
@@ -763,6 +824,14 @@ function AdminPanel() {
             {tab === 'results' && resultsReleased && <span className="yds-badge-green">LIVE</span>}
           </button>
         ))}
+        {/* Event Status & Announcements — available to all admins */}
+        <button
+          type="button"
+          className={activeTab === 'announcement' ? 'yds-nav-btn active' : 'yds-nav-btn'}
+          onClick={() => { setActiveTab('announcement'); setSelectedAppId(null); }}
+        >
+          📣 Event Status
+        </button>
         {isSuperAdmin && (
           <>
             <button
@@ -2233,6 +2302,343 @@ function AdminPanel() {
           </div>
         </div>
       )}
+
+      {/* ── TAB: EVENT STATUS & ANNOUNCEMENTS ──────────────────────────────── */}
+      {activeTab === 'announcement' && (
+        <section className="space-y-6 animate-in fade-in-50">
+          <div className="section-topline">
+            <span>EVENT STATUS & ANNOUNCEMENTS</span>
+            <span>ADMIN-CONTROLLED · PERSISTENT</span>
+          </div>
+
+          {announcementQuery.isLoading && (
+            <div className="yds-card p-6 text-center text-muted-foreground">Loading announcement settings…</div>
+          )}
+
+          {announcementQuery.isError && (
+            <div className="yds-card p-6 text-center text-destructive">Failed to load announcement settings. Please refresh.</div>
+          )}
+
+          {announcementQuery.data && (
+            <>
+              {/* Current published status */}
+              <div className="yds-card p-5 space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <h3 className="font-semibold text-base">Published Announcement Status</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Last updated by <strong>{announcementQuery.data.updatedBy ?? '—'}</strong> at {announcementQuery.data.updatedAt ? new Date(announcementQuery.data.updatedAt).toLocaleString('en-IN') : '—'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold border ${announcementQuery.data.isVisible ? 'bg-green-500/10 text-green-700 border-green-500/30' : 'bg-muted text-muted-foreground border-border'}`}>
+                      {announcementQuery.data.isVisible ? '● VISIBLE' : '○ HIDDEN'}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold bg-gold/10 text-gold border border-gold/30">
+                      {announcementQuery.data.eventStatus?.replace(/_/g, ' ')}
+                    </span>
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-bold border ${announcementQuery.data.freshRegistrationStatus === 'OPEN' ? 'bg-green-500/10 text-green-700 border-green-500/30' : 'bg-muted text-muted-foreground border-border'}`}>
+                      REG: {announcementQuery.data.freshRegistrationStatus?.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                </div>
+                {announcementQuery.data.published && (
+                  <div className="text-xs text-muted-foreground border-t pt-3 mt-3">
+                    <span className="font-semibold">Published title:</span> {announcementQuery.data.published.title}<br />
+                    <span className="font-semibold">Published at:</span> {announcementQuery.data.published.publishedAt ? new Date(announcementQuery.data.published.publishedAt).toLocaleString('en-IN') : '—'}
+                    {' · '}<span className="font-semibold">By:</span> {announcementQuery.data.published.publishedBy ?? '—'}
+                  </div>
+                )}
+              </div>
+
+              {/* Edit form */}
+              <div className="yds-card p-6 space-y-5">
+                <h3 className="font-semibold text-base border-b pb-3">Edit Announcement</h3>
+
+                {announcementMsg && (
+                  <div className={`text-sm px-4 py-2 rounded border ${announcementMsg.startsWith('✅') ? 'bg-green-500/10 text-green-700 border-green-500/30' : 'bg-destructive/10 text-destructive border-destructive/30'}`}>
+                    {announcementMsg}
+                  </div>
+                )}
+
+                {/* Event Status + Registration Status */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Event Status</label>
+                    <select
+                      className="yds-search-input w-full"
+                      value={announcementForm.eventStatus}
+                      onChange={(e) => setAnnouncementForm((f) => ({ ...f, eventStatus: e.target.value as any }))}
+                    >
+                      <option value="SCHEDULED">Scheduled</option>
+                      <option value="POSTPONED">Postponed</option>
+                      <option value="REGISTRATION_OPEN">Registration Open</option>
+                      <option value="REGISTRATION_CLOSED">Registration Closed</option>
+                      <option value="CANCELLED">Cancelled</option>
+                      <option value="COMPLETED">Completed</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Fresh Registration Status</label>
+                    <select
+                      className="yds-search-input w-full"
+                      value={announcementForm.freshRegistrationStatus}
+                      onChange={(e) => setAnnouncementForm((f) => ({ ...f, freshRegistrationStatus: e.target.value as any }))}
+                    >
+                      <option value="NOT_OPEN">Not Open</option>
+                      <option value="OPEN">Open</option>
+                      <option value="CLOSED">Closed</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Optional revised details */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Revised Dates <span className="text-muted-foreground/60">(optional)</span></label>
+                    <input
+                      className="yds-search-input w-full"
+                      value={announcementForm.revisedDates}
+                      onChange={(e) => setAnnouncementForm((f) => ({ ...f, revisedDates: e.target.value }))}
+                      placeholder="e.g. 20th, 21st & 22nd November 2026"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Revised Venue <span className="text-muted-foreground/60">(optional)</span></label>
+                    <input
+                      className="yds-search-input w-full"
+                      value={announcementForm.revisedVenue}
+                      onChange={(e) => setAnnouncementForm((f) => ({ ...f, revisedVenue: e.target.value }))}
+                      placeholder="e.g. Ghulam Ahmed Hall, MJCET, Hyderabad"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Registration Deadline Override <span className="text-muted-foreground/60">(optional — ISO date)</span></label>
+                  <input
+                    className="yds-search-input w-full"
+                    type="datetime-local"
+                    value={announcementForm.registrationDeadlineOverride}
+                    onChange={(e) => setAnnouncementForm((f) => ({ ...f, registrationDeadlineOverride: e.target.value }))}
+                  />
+                </div>
+
+                {/* Announcement content */}
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Announcement Title</label>
+                  <input
+                    className="yds-search-input w-full"
+                    value={announcementForm.title}
+                    onChange={(e) => setAnnouncementForm((f) => ({ ...f, title: e.target.value }))}
+                    placeholder="YDS 2026 Has Been Postponed"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Short Banner Message</label>
+                  <input
+                    className="yds-search-input w-full"
+                    value={announcementForm.bannerMessage}
+                    onChange={(e) => setAnnouncementForm((f) => ({ ...f, bannerMessage: e.target.value }))}
+                    placeholder="Brief message shown on the homepage banner"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Reason for Postponement</label>
+                  <input
+                    className="yds-search-input w-full"
+                    value={announcementForm.reason}
+                    onChange={(e) => setAnnouncementForm((f) => ({ ...f, reason: e.target.value }))}
+                    placeholder="Venue-related issues requiring additional time for arrangements."
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Full Announcement Body</label>
+                  <textarea
+                    className="yds-search-input w-full min-h-[240px] resize-y font-mono text-sm"
+                    value={announcementForm.fullBody}
+                    onChange={(e) => setAnnouncementForm((f) => ({ ...f, fullBody: e.target.value }))}
+                    placeholder="Full announcement text displayed when participants click 'Read Full Notice'"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Use blank lines to separate paragraphs.</p>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex flex-wrap gap-3 pt-2 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={announcementSaving}
+                    onClick={async () => {
+                      setAnnouncementSaving(true);
+                      setAnnouncementMsg('');
+                      try {
+                        const tok = idTokenFromCtx || await getIdToken() || '';
+                        await adminSaveDraftAnnouncement({
+                          data: {
+                            idToken: tok,
+                            ...announcementForm,
+                            registrationDeadlineOverride: announcementForm.registrationDeadlineOverride || null,
+                            revisedDates: announcementForm.revisedDates || null,
+                            revisedVenue: announcementForm.revisedVenue || null,
+                          },
+                        });
+                        queryClient.invalidateQueries({ queryKey: ['admin-announcement'] });
+                        setAnnouncementMsg('✅ Draft saved successfully. The live announcement has not been changed.');
+                      } catch (err: any) {
+                        setAnnouncementMsg(`❌ Error: ${err?.message || err}`);
+                      } finally {
+                        setAnnouncementSaving(false);
+                      }
+                    }}
+                  >
+                    {announcementSaving ? 'Saving…' : 'Save Draft'}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAnnouncementPreview(!showAnnouncementPreview)}
+                  >
+                    {showAnnouncementPreview ? 'Hide Preview' : 'Preview Announcement'}
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    disabled={announcementPublishing}
+                    onClick={async () => {
+                      if (!confirm('Publish this announcement? It will become immediately visible to all public visitors. This cannot be automatically reversed — you must manually hide it.')) return;
+                      setAnnouncementPublishing(true);
+                      setAnnouncementMsg('');
+                      try {
+                        const tok = idTokenFromCtx || await getIdToken() || '';
+                        await adminPublishAnnouncement({
+                          data: {
+                            idToken: tok,
+                            ...announcementForm,
+                            registrationDeadlineOverride: announcementForm.registrationDeadlineOverride || null,
+                            revisedDates: announcementForm.revisedDates || null,
+                            revisedVenue: announcementForm.revisedVenue || null,
+                          },
+                        });
+                        queryClient.invalidateQueries({ queryKey: ['admin-announcement'] });
+                        queryClient.invalidateQueries({ queryKey: ['public-announcement'] });
+                        setAnnouncementMsg('✅ Announcement published successfully. It is now live on the public homepage.');
+                        setAnnouncementFormLoaded(false);
+                      } catch (err: any) {
+                        setAnnouncementMsg(`❌ Error: ${err?.message || err}`);
+                      } finally {
+                        setAnnouncementPublishing(false);
+                      }
+                    }}
+                  >
+                    {announcementPublishing ? 'Publishing…' : 'Publish Announcement'}
+                  </Button>
+
+                  {announcementQuery.data.isVisible ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                      onClick={async () => {
+                        if (!confirm('Hide the public announcement? Visitors will no longer see the postponement notice until you publish again.')) return;
+                        try {
+                          const tok = idTokenFromCtx || await getIdToken() || '';
+                          await adminHideAnnouncement({ data: { idToken: tok } });
+                          queryClient.invalidateQueries({ queryKey: ['admin-announcement'] });
+                          queryClient.invalidateQueries({ queryKey: ['public-announcement'] });
+                          setAnnouncementMsg('✅ Announcement hidden from public view.');
+                          setAnnouncementFormLoaded(false);
+                        } catch (err: any) {
+                          setAnnouncementMsg(`❌ Error: ${err?.message || err}`);
+                        }
+                      }}
+                    >
+                      Hide Announcement
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-green-500/50 text-green-700 hover:bg-green-500/10"
+                      onClick={async () => {
+                        try {
+                          const tok = idTokenFromCtx || await getIdToken() || '';
+                          await adminShowAnnouncement({ data: { idToken: tok } });
+                          queryClient.invalidateQueries({ queryKey: ['admin-announcement'] });
+                          queryClient.invalidateQueries({ queryKey: ['public-announcement'] });
+                          setAnnouncementMsg('✅ Announcement restored to public view.');
+                          setAnnouncementFormLoaded(false);
+                        } catch (err: any) {
+                          setAnnouncementMsg(`❌ Error: ${err?.message || err}`);
+                        }
+                      }}
+                    >
+                      Show Announcement
+                    </Button>
+                  )}
+                </div>
+
+                {/* Inline Preview */}
+                {showAnnouncementPreview && (
+                  <div className="border rounded-lg p-5 bg-muted/30 space-y-3 mt-4">
+                    <p className="text-xs font-bold uppercase text-muted-foreground">Preview — as it will appear on the public homepage</p>
+                    <div className="border-l-4 border-gold pl-4 space-y-2">
+                      <p className="text-xs font-bold uppercase text-gold">OFFICIAL NOTICE</p>
+                      <h4 className="font-semibold text-lg">{announcementForm.title || '(No title)'}</h4>
+                      <p className="text-sm text-muted-foreground">{announcementForm.bannerMessage || '(No banner message)'}</p>
+                      <div className="flex gap-2 flex-wrap pt-1">
+                        <span className="px-2 py-0.5 rounded text-xs bg-gold/10 text-gold border border-gold/30 font-bold">{announcementForm.eventStatus.replace(/_/g, ' ')}</span>
+                        <span className="px-2 py-0.5 rounded text-xs bg-muted text-muted-foreground border border-border font-bold">REG: {announcementForm.freshRegistrationStatus.replace(/_/g, ' ')}</span>
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground border-t pt-3 space-y-1">
+                      {announcementForm.fullBody.split('\n').map((line, i) =>
+                        line.trim() === '' ? <br key={i} /> : <p key={i}>{line}</p>
+                      )}
+                    </div>
+                    {(announcementForm.revisedDates || announcementForm.revisedVenue) && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t pt-3">
+                        {announcementForm.revisedDates && (
+                          <div>
+                            <p className="text-xs font-bold uppercase text-muted-foreground">Revised Dates</p>
+                            <p className="text-sm font-semibold">{announcementForm.revisedDates}</p>
+                          </div>
+                        )}
+                        {announcementForm.revisedVenue && (
+                          <div>
+                            <p className="text-xs font-bold uppercase text-muted-foreground">Revised Venue</p>
+                            <p className="text-sm font-semibold">{announcementForm.revisedVenue}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Danger zone: Registration toggle summary */}
+              <div className="yds-card p-5 border-amber-500/30 space-y-2">
+                <h4 className="font-semibold text-sm flex items-center gap-2">
+                  <AlertTriangle size={15} className="text-amber-500" /> Registration Gate Status
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  Server-side enforcement is active. All registration submissions are validated against the current Fresh Registration Status on the backend — frontend form access alone is not sufficient.
+                </p>
+                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded text-sm font-bold border ${announcementForm.freshRegistrationStatus === 'OPEN' ? 'bg-green-500/10 text-green-700 border-green-500/30' : 'bg-muted text-muted-foreground border-border'}`}>
+                  {announcementForm.freshRegistrationStatus === 'OPEN'
+                    ? '✅ Registrations are OPEN — the form will accept submissions after publishing'
+                    : '🔒 Registrations are CLOSED — all submission attempts will be rejected on the server'}
+                </div>
+              </div>
+            </>
+          )}
+        </section>
+      )}
+
     </main>
   );
 }

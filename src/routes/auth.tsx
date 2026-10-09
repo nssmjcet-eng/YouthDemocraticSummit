@@ -122,9 +122,17 @@ function AuthPage() {
         try {
           const idToken = await user.getIdToken();
           const ok = await isAuthorisedAdmin(idToken);
-          if (ok) navigate({ to: '/admin', replace: true });
+          if (ok) {
+            navigate({ to: '/admin', replace: true });
+          } else {
+            await fbSignOut(firebaseAuth);
+            setDeniedEmail(user.email ?? '');
+            setDenied(true);
+          }
         } catch {
-          // Not authorized — stay on auth page
+          await fbSignOut(firebaseAuth);
+          setDeniedEmail(user.email ?? '');
+          setDenied(true);
         }
       }
     });

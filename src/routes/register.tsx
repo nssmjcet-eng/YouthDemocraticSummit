@@ -3,6 +3,9 @@ import { ArrowLeft, Users, Calendar, MapPin, Clock, Award, Instagram } from 'luc
 import { RegistrationForm } from '@/components/RegistrationForm';
 import { YDS_CONFIG } from '@/config/yds';
 import logo from '@/assets/nss-logo.png';
+import { useQuery } from '@tanstack/react-query';
+import { getPublicAnnouncement } from '@/functions/announcement';
+import { RegistrationClosedNotice } from '@/components/PostponementBanner';
 
 export const Route = createFileRoute('/register')({
   head: () => ({
@@ -38,6 +41,17 @@ export const Route = createFileRoute('/register')({
 });
 
 function RegisterPage() {
+  // Fetch registration status from the backend
+  const announcementQuery = useQuery({
+    queryKey: ['public-announcement'],
+    queryFn: () => getPublicAnnouncement(),
+    staleTime: 60_000,
+    retry: 2,
+  });
+
+  const freshStatus = announcementQuery.data?.freshRegistrationStatus ?? 'NOT_OPEN';
+  const isRegistrationOpen = freshStatus === 'OPEN';
+
   return (
     <div className="register-page-wrapper">
       {/* Top Bar with Back to YDS Button */}
@@ -73,43 +87,55 @@ function RegisterPage() {
               <em>&amp; Parliamentary Selection.</em>
             </h1>
 
-            <div className="register-hero-meta">
-              <span className="inline-flex items-center gap-1.5">
-                <Calendar size={15} className="text-gold" />
-                {YDS_CONFIG.dates}
-              </span>
-              <span>·</span>
-              <span className="inline-flex items-center gap-1.5">
-                <MapPin size={15} className="text-gold" />
-                {YDS_CONFIG.venue}
-              </span>
-              <span>·</span>
-              <span className="inline-flex items-center gap-1.5">
-                <Clock size={15} className="text-gold" />
-                {YDS_CONFIG.timing}
-              </span>
-              <span>·</span>
-              <span className="inline-flex items-center gap-1.5 font-bold text-gold">
-                <Award size={15} />
-                Fee: {YDS_CONFIG.registrationFee}
-              </span>
-            </div>
-
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <div className="register-key-badge">
-                <Users size={18} className="text-gold flex-none" />
-                <span>Teams must consist of exactly 5 members (1 Team Leader + 4 Members).</span>
+            {isRegistrationOpen && (
+              <div className="register-hero-meta">
+                <span className="inline-flex items-center gap-1.5">
+                  <Calendar size={15} className="text-gold" />
+                  {announcementQuery.data?.revisedDates || YDS_CONFIG.dates}
+                </span>
+                <span>·</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <MapPin size={15} className="text-gold" />
+                  {announcementQuery.data?.revisedVenue || YDS_CONFIG.venue}
+                </span>
+                <span>·</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock size={15} className="text-gold" />
+                  {YDS_CONFIG.timing}
+                </span>
+                <span>·</span>
+                <span className="inline-flex items-center gap-1.5 font-bold text-gold">
+                  <Award size={15} />
+                  Fee: {YDS_CONFIG.registrationFee}
+                </span>
               </div>
-            </div>
+            )}
+
+            {isRegistrationOpen && (
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <div className="register-key-badge">
+                  <Users size={18} className="text-gold flex-none" />
+                  <span>Teams must consist of exactly 5 members (1 Team Leader + 4 Members).</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Main Registration Form Container */}
+      {/* Main Registration Form Container — only shown when registration is open */}
       <main className="register-form-container">
         <div className="section-inner flex justify-center">
           <div className="register-form-surface">
-            <RegistrationForm />
+            {announcementQuery.isLoading ? (
+              <div className="registration-closed-notice">
+                <p className="registration-closed-message">Checking registration status…</p>
+              </div>
+            ) : isRegistrationOpen ? (
+              <RegistrationForm />
+            ) : (
+              <RegistrationClosedNotice freshStatus={freshStatus} />
+            )}
           </div>
         </div>
       </main>

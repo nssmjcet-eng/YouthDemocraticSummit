@@ -3971,12 +3971,269 @@
   color: oklch(0.75 0.015 83);
 }
 
-@media (max-width: 900px) {
-  .structure-preview-card {
-    grid-template-columns: 1fr;
-  }
+
+/* ── Postponement Banner & Notices ────────────────────────────────────────── */
+
+.postponement-banner {
+  background: var(--deep);
+  border-bottom: 2px solid var(--gold);
+  color: var(--ivory);
+  padding: 16px 0;
+  position: relative;
+  z-index: 50;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
+.postponement-banner--postponed {
+  border-bottom-color: var(--gold);
+  background: radial-gradient(circle at top right, oklch(0.25 0.04 70 / 0.4), var(--deep) 70%);
+}
 
+.postponement-banner--error {
+  border-bottom-color: var(--destructive);
+  background: oklch(0.2 0.03 25);
+}
 
+.postponement-banner-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
+.postponement-banner-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.postponement-banner-icon-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.postponement-banner-icon {
+  color: var(--gold);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.postponement-banner-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--gold);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.postponement-banner-title {
+  font: 600 20px/1.2 var(--serif);
+  color: var(--ivory);
+  margin: 2px 0 0;
+}
+
+.postponement-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.postponement-banner-toggle {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.postponement-banner-toggle:hover {
+  background: var(--gold);
+  color: var(--deep);
+}
+
+.postponement-banner-dismiss {
+  background: transparent;
+  border: 1px solid oklch(0.5 0.02 240 / 0.4);
+  color: var(--ivory);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.postponement-banner-dismiss:hover {
+  opacity: 1;
+}
+
+.postponement-banner-message {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: oklch(0.85 0.015 83);
+  margin: 0;
+  max-width: 900px;
+}
+
+.postponement-banner-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.postponement-pill {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.postponement-pill--status-postponed {
+  background: oklch(0.3 0.06 70 / 0.3);
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.postponement-pill--status-scheduled {
+  background: oklch(0.3 0.06 140 / 0.3);
+  color: oklch(0.75 0.15 140);
+  border-color: oklch(0.6 0.15 140);
+}
+
+.postponement-pill--reg-closed {
+  background: oklch(0.25 0.02 240);
+  color: oklch(0.7 0.01 80);
+  border-color: oklch(0.4 0.02 240);
+}
+
+.postponement-pill--reg-open {
+  background: oklch(0.3 0.06 140 / 0.3);
+  color: oklch(0.8 0.15 140);
+  border-color: oklch(0.6 0.15 140);
+}
+
+.postponement-full-notice {
+  margin-top: 14px;
+  padding-top: 16px;
+  border-top: 1px solid oklch(0.4 0.02 240 / 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.postponement-full-notice-body {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: oklch(0.88 0.015 83);
+  max-width: 960px;
+}
+
+.postponement-full-notice-body p {
+  margin: 0 0 10px;
+}
+
+.postponement-revised-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  background: oklch(0.15 0.025 240);
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--gold);
+}
+
+.postponement-revised-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.postponement-revised-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+}
+
+.postponement-revised-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ivory);
+}
+
+.postponement-reg-notice {
+  background: oklch(0.22 0.03 240);
+  border: 1px solid oklch(0.4 0.03 240);
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: oklch(0.85 0.015 83);
+  line-height: 1.5;
+}
+
+.postponement-reg-notice--open {
+  border-color: oklch(0.5 0.12 140);
+  background: oklch(0.22 0.05 140 / 0.4);
+}
+
+/* ── Registration Closed Notice (on /register page) ───────────────────────── */
+
+.registration-closed-notice {
+  text-align: center;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.registration-closed-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: oklch(0.72 0.081 78 / 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--gold);
+}
+
+.registration-closed-title {
+  font: 500 clamp(24px, 3.5vw, 32px)/1.2 var(--serif);
+  color: var(--foreground);
+  margin: 0;
+}
+
+.registration-closed-message {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+  margin: 0;
+  font-weight: 500;
+}
+
+.registration-closed-sub {
+  font-size: 12.5px;
+  color: var(--muted-foreground);
+  opacity: 0.8;
+  margin: 0;
+}
